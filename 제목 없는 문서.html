@@ -1,0 +1,3521 @@
+﻿<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>NurseTap (널스 탭) - 간호대생 통합 플랫폼</title>
+    <style>
+        :root {
+            --primary: #0284c7;
+            --primary-dark: #0369a1;
+            --primary-light: #e0f2fe;
+            --accent: #0d9488;
+            --bg-main: #f8fafc;
+            --sidebar-bg: #0f172a;
+            --card-bg: #ffffff;
+            --text-main: #1e293b;
+            --text-muted: #64748b;
+            --border-color: #cbd5e1;
+            --radius-lg: 16px;
+            --radius-md: 12px;
+            --radius-sm: 8px;
+        }
+
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        }
+
+
+        html, body {
+            width: 100%;
+            max-width: 100vw;
+            overflow-x: hidden;
+            background-color: var(--bg-main);
+            color: var(--text-main);
+            line-height: 1.5;
+        }
+
+
+        body {
+            display: flex;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+
+        /* 접이식 사이드바 (기본 68px, 확장 시 250px) */
+        .sidebar {
+            width: 250px;
+            background-color: var(--sidebar-bg);
+            color: #ffffff;
+            display: flex;
+            flex-direction: column;
+            padding: 18px 12px;
+            flex-shrink: 0;
+            transition: width 0.25s cubic-bezier(0.4, 0, 0.2, 1), padding 0.25s ease;
+            position: relative;
+            z-index: 120;
+            overflow: hidden;
+        }
+
+
+        .sidebar.collapsed {
+            width: 68px;
+            padding: 18px 10px;
+        }
+
+
+        .logo-area {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding-bottom: 16px;
+            border-bottom: 1px solid #334155;
+            margin-bottom: 16px;
+            min-height: 46px;
+        }
+
+
+        .sidebar.collapsed .logo-area {
+            justify-content: center;
+        }
+
+
+        .logo-icon {
+            width: 42px;
+            height: 42px;
+            background: linear-gradient(135deg, #0284c7, #0d9488);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            box-shadow: 0 4px 12px rgba(2, 132, 199, 0.3);
+            flex-shrink: 0;
+            cursor: pointer;
+        }
+
+
+        .logo-text {
+            font-size: 18px;
+            font-weight: 800;
+            letter-spacing: -0.4px;
+            color: #f8fafc;
+            white-space: nowrap;
+        }
+
+
+        .sidebar.collapsed .logo-text,
+        .sidebar.collapsed .nav-section-title,
+        .sidebar.collapsed .nav-text {
+            display: none;
+        }
+
+
+        .nav-menu {
+            list-style: none;
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+            flex: 1;
+            overflow-y: auto;
+            overflow-x: hidden;
+        }
+
+
+        .nav-section-title {
+            font-size: 11px;
+            text-transform: uppercase;
+            color: #94a3b8;
+            font-weight: 700;
+            margin: 10px 0 4px 10px;
+            letter-spacing: 0.4px;
+            white-space: nowrap;
+        }
+
+
+        .nav-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 10px 12px;
+            color: #94a3b8;
+            border-radius: 10px;
+            font-size: 13.5px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            user-select: none;
+            white-space: nowrap;
+        }
+
+
+        .sidebar.collapsed .nav-item {
+            justify-content: center;
+            padding: 10px 0;
+        }
+
+
+        .nav-item:hover {
+            background-color: #1e293b;
+            color: #f8fafc;
+        }
+
+
+        .nav-item.active {
+            background: linear-gradient(135deg, #0284c7, #0d9488);
+            color: #ffffff;
+            box-shadow: 0 4px 12px rgba(2, 132, 199, 0.3);
+        }
+
+
+        .nav-icon {
+            font-size: 17px;
+            flex-shrink: 0;
+        }
+
+
+        /* 메인 영역 - 가로 스크롤 방지 */
+        .main-wrapper {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            overflow-x: hidden;
+            background-color: var(--bg-main);
+            min-width: 0;
+            width: 100%;
+        }
+
+
+        .top-notice-bar {
+            background-color: #ffffff;
+            border-bottom: 1px solid #e2e8f0;
+            padding: 10px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 10px;
+            flex-wrap: wrap;
+            min-width: 0;
+        }
+
+
+        .header-left-group,
+        .header-right-group {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex-wrap: wrap;
+            min-width: 0;
+        }
+
+
+        .header-toggle-btn {
+            background: #ffffff;
+            color: #0284c7;
+            border: 1px solid #cbd5e1;
+            width: 36px;
+            height: 36px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            flex-shrink: 0;
+            font-size: 14px;
+            font-weight: 800;
+        }
+
+
+        .header-toggle-btn:hover {
+            background: var(--primary);
+            color: #ffffff;
+            border-color: var(--primary);
+        }
+
+
+        .app-status-tag {
+            display: inline-flex;
+            align-items: center;
+            gap: 7px;
+            font-size: 13.5px;
+            color: #0f172a;
+            font-weight: 600;
+        }
+
+
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            background-color: #10b981;
+            border-radius: 50%;
+            display: inline-block;
+            box-shadow: 0 0 8px #10b981;
+            flex-shrink: 0;
+        }
+
+
+        .premium-top-btn {
+            background: linear-gradient(135deg, #f59e0b, #ea580c);
+            color: #ffffff;
+            border: none;
+            padding: 7px 13px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 800;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            white-space: nowrap;
+            box-shadow: 0 2px 8px rgba(245, 158, 11, 0.32);
+            transition: transform 0.15s;
+        }
+
+
+        .premium-top-btn:hover {
+            transform: translateY(-1px);
+        }
+
+
+        .premium-top-btn.active-member {
+            background: linear-gradient(135deg, #0d9488, #0284c7);
+        }
+
+
+        .user-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            background: var(--primary-light);
+            color: var(--primary-dark);
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-weight: 700;
+            font-size: 12.5px;
+            border: 1px solid #bae6fd;
+            cursor: pointer;
+            white-space: nowrap;
+        }
+
+
+        .content-container {
+            flex: 1;
+            overflow-y: auto;
+            overflow-x: hidden;
+            padding: 20px 22px;
+            min-width: 0;
+            width: 100%;
+        }
+
+
+        .tab-content {
+            display: none !important;
+            width: 100%;
+            min-width: 0;
+        }
+
+
+        .tab-content.active {
+            display: block !important;
+            animation: fadeIn 0.22s ease-in-out;
+        }
+
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(4px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+
+        /* 홈 히어로 배너 */
+        .hero-banner {
+            position: relative;
+            background-image: linear-gradient(110deg, rgba(15, 23, 42, 0.72) 0%, rgba(2, 132, 199, 0.62) 55%, rgba(13, 148, 136, 0.56) 100%),
+                              url('1000022079.png');
+            background-size: cover;
+            background-position: center 32%;
+            color: #ffffff;
+            border-radius: var(--radius-lg);
+            padding: 24px 26px;
+            display: grid;
+            grid-template-columns: minmax(0, 1.45fr) minmax(240px, 310px);
+            align-items: center;
+            gap: 20px;
+            box-shadow: 0 10px 22px -6px rgba(15, 23, 42, 0.22);
+            margin-bottom: 20px;
+            width: 100%;
+            overflow: hidden;
+        }
+
+
+        @media (max-width: 820px) {
+            .hero-banner {
+                grid-template-columns: 1fr;
+                padding: 20px;
+            }
+        }
+
+
+        .hero-left {
+            min-width: 0;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+
+        .hero-badge {
+            background: rgba(255, 255, 255, 0.2);
+            backdrop-filter: blur(4px);
+            padding: 4px 11px;
+            border-radius: 20px;
+            font-size: 11.5px;
+            font-weight: 700;
+            align-self: flex-start;
+        }
+
+
+        .hero-title-main {
+            font-size: clamp(20px, 2.4vw, 25px);
+            font-weight: 900;
+            letter-spacing: -0.5px;
+            line-height: 1.25;
+            word-break: keep-all;
+        }
+
+
+        .hero-desc-text {
+            font-size: 13.5px;
+            color: #f1f5f9;
+            line-height: 1.6;
+            max-width: 560px;
+            word-break: keep-all;
+            margin-top: 2px;
+        }
+
+
+        /* D-Day 박스 */
+        .hero-dday-box {
+            background: rgba(15, 23, 42, 0.72);
+            backdrop-filter: blur(8px);
+            border: 1px solid rgba(255, 255, 255, 0.28);
+            border-radius: 14px;
+            padding: 15px 16px;
+            width: 100%;
+            min-width: 0;
+            overflow: hidden;
+        }
+
+
+        .hero-dday-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 10px;
+            padding-bottom: 8px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+
+        .hero-dday-title {
+            font-size: 12.5px;
+            font-weight: 800;
+            color: #bae6fd;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+
+        .hero-dday-edit {
+            background: rgba(255, 255, 255, 0.16);
+            color: #ffffff;
+            border: 1px solid rgba(255, 255, 255, 0.34);
+            padding: 3px 8px;
+            border-radius: 6px;
+            font-size: 11px;
+            font-weight: 700;
+            cursor: pointer;
+            white-space: nowrap;
+            flex-shrink: 0;
+        }
+
+
+        .hero-dday-edit:hover {
+            background: rgba(255, 255, 255, 0.28);
+        }
+
+
+        .hero-dday-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 8px;
+            font-size: 12.5px;
+        }
+
+
+        .hero-dday-row:last-child {
+            margin-bottom: 0;
+        }
+
+
+        .hero-dday-label {
+            font-weight: 600;
+            color: #f1f5f9;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            min-width: 0;
+        }
+
+
+        .hero-dday-pill {
+            background: #0284c7;
+            color: #ffffff;
+            font-weight: 800;
+            font-size: 11.5px;
+            padding: 2px 9px;
+            border-radius: 20px;
+            white-space: nowrap;
+            flex-shrink: 0;
+        }
+
+
+        .hero-dday-pill.urgent {
+            background: #ef4444;
+        }
+
+
+        /* 퀵 타일 */
+        .app-tiles-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(185px, 1fr));
+            gap: 14px;
+            margin-bottom: 20px;
+            width: 100%;
+        }
+
+
+        .app-tile {
+            background: #ffffff;
+            border: 1px solid #cbd5e1;
+            border-radius: var(--radius-md);
+            padding: 15px 14px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            min-width: 0;
+        }
+
+
+        .app-tile:hover {
+            transform: translateY(-2px);
+            border-color: var(--primary);
+            box-shadow: 0 8px 18px rgba(2, 132, 199, 0.12);
+        }
+
+
+        .tile-icon-box {
+            width: 42px;
+            height: 42px;
+            border-radius: 11px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 19px;
+            flex-shrink: 0;
+        }
+
+
+        .tile-info {
+            display: flex;
+            flex-direction: column;
+            min-width: 0;
+        }
+
+
+        .tile-title {
+            font-size: 14px;
+            font-weight: 800;
+            color: var(--text-main);
+            word-break: keep-all;
+        }
+
+
+        .tile-desc {
+            font-size: 11.5px;
+            color: var(--text-muted);
+            word-break: keep-all;
+        }
+
+
+        /* 대시보드 행 */
+        .horizontal-cards-row {
+            display: grid;
+            grid-template-columns: minmax(0, 1.45fr) minmax(0, 1fr);
+            gap: 18px;
+            width: 100%;
+        }
+
+
+        @media (max-width: 860px) {
+            .horizontal-cards-row {
+                grid-template-columns: 1fr;
+            }
+        }
+
+
+        .widget-card {
+            background: #ffffff;
+            border-radius: var(--radius-md);
+            border: 1px solid #cbd5e1;
+            padding: 18px;
+            min-width: 0;
+        }
+
+
+        .widget-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+            padding-bottom: 8px;
+            border-bottom: 2px solid #f1f5f9;
+        }
+
+
+        .widget-title {
+            font-size: 15px;
+            font-weight: 800;
+            color: #0f172a;
+        }
+
+
+        .widget-more {
+            font-size: 12.5px;
+            color: var(--primary);
+            font-weight: 700;
+            cursor: pointer;
+            white-space: nowrap;
+        }
+
+
+        .post-list {
+            background: #ffffff;
+            border: 1px solid #e2e8f0;
+            border-radius: var(--radius-md);
+            overflow: hidden;
+        }
+
+
+        .post-item {
+            padding: 13px 15px;
+            border-bottom: 1px solid #f1f5f9;
+            cursor: pointer;
+            transition: background 0.15s;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 10px;
+            min-width: 0;
+        }
+
+
+        .post-item:last-child {
+            border-bottom: none;
+        }
+
+
+        .post-item:hover {
+            background: #f8fafc;
+        }
+
+
+        .post-item-main {
+            min-width: 0;
+            flex: 1;
+        }
+
+
+        .post-item-title {
+            font-size: 13.5px;
+            font-weight: 700;
+            color: #0f172a;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+
+        .post-item-meta {
+            font-size: 11px;
+            color: var(--text-muted);
+            margin-top: 2px;
+        }
+
+
+        .post-item-comment {
+            font-size: 11.5px;
+            font-weight: 700;
+            color: var(--primary);
+            flex-shrink: 0;
+            background: var(--primary-light);
+            padding: 3px 9px;
+            border-radius: 12px;
+            white-space: nowrap;
+        }
+
+
+        .notice-horizontal-list {
+            list-style: none;
+            display: flex;
+            flex-direction: column;
+            gap: 9px;
+        }
+
+
+        .notice-horizontal-item {
+            padding: 10px 12px;
+            background: #f8fafc;
+            border-radius: 8px;
+            font-size: 12.5px;
+            font-weight: 600;
+            color: #334155;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 8px;
+        }
+
+
+        /* AI임상 시뮬레이션 */
+        .sim-top-banner {
+            background: linear-gradient(135deg, #0f172a 0%, #0369a1 65%, #0d9488 100%);
+            color: #ffffff;
+            border-radius: var(--radius-lg);
+            padding: 18px 22px;
+            margin-bottom: 18px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 14px;
+            flex-wrap: wrap;
+        }
+
+
+        .sim-setup-card {
+            background: #ffffff;
+            border: 1px solid #cbd5e1;
+            border-radius: var(--radius-lg);
+            padding: 20px;
+            margin-bottom: 18px;
+            width: 100%;
+            min-width: 0;
+        }
+
+
+        .scenario-cards-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(225px, 1fr));
+            gap: 12px;
+            margin-bottom: 18px;
+            width: 100%;
+        }
+
+
+        .scenario-card {
+            background: #f8fafc;
+            border: 2px solid #cbd5e1;
+            border-radius: 12px;
+            padding: 14px 15px;
+            cursor: pointer;
+            transition: all 0.18s ease;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            min-width: 0;
+        }
+
+
+        .scenario-card:hover {
+            border-color: var(--primary);
+            background: #ffffff;
+        }
+
+
+        .scenario-card.selected {
+            border-color: var(--primary);
+            background: #f0f9ff;
+            box-shadow: 0 6px 14px rgba(2, 132, 199, 0.14);
+        }
+
+
+        .scenario-dept {
+            font-size: 11px;
+            font-weight: 800;
+            color: var(--primary-dark);
+            background: var(--primary-light);
+            padding: 2px 8px;
+            border-radius: 10px;
+            align-self: flex-start;
+        }
+
+
+        .scenario-title {
+            font-size: 13.5px;
+            font-weight: 800;
+            color: #0f172a;
+            line-height: 1.3;
+            word-break: keep-all;
+        }
+
+
+        .scenario-summary {
+            font-size: 12px;
+            color: var(--text-muted);
+            line-height: 1.45;
+            word-break: keep-all;
+        }
+
+
+        /* 프리미엄 잠금 & 블러 영역 */
+        .premium-sim-section {
+            position: relative;
+            width: 100%;
+            min-width: 0;
+            border: 1.5px solid #cbd5e1;
+            border-radius: 14px;
+            padding: 16px;
+            margin-bottom: 18px;
+            background: #ffffff;
+            overflow: hidden;
+        }
+
+
+        .premium-blur-content {
+            filter: blur(5px);
+            opacity: 0.55;
+            pointer-events: none;
+            user-select: none;
+            transition: filter 0.25s ease, opacity 0.25s ease;
+            width: 100%;
+            min-width: 0;
+        }
+
+
+        .premium-sim-section.unlocked .premium-blur-content {
+            filter: none;
+            opacity: 1;
+            pointer-events: auto;
+            user-select: auto;
+        }
+
+
+        .premium-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 14px;
+            width: 100%;
+            min-width: 0;
+        }
+
+
+        .premium-lock-overlay {
+            position: absolute;
+            inset: 0;
+            z-index: 8;
+            background: rgba(15, 23, 42, 0.46);
+            backdrop-filter: blur(2px);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            padding: 16px;
+            gap: 10px;
+        }
+
+
+        .premium-sim-section.unlocked .premium-lock-overlay {
+            display: none;
+        }
+
+
+        .lock-pill-badge {
+            background: #0f172a;
+            color: #fbbf24;
+            border: 1px solid #f59e0b;
+            padding: 5px 13px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 800;
+        }
+
+
+        .role-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(145px, 1fr));
+            gap: 10px;
+            margin-bottom: 16px;
+        }
+
+
+        .role-chip {
+            border: 1.5px solid #cbd5e1;
+            background: #f8fafc;
+            border-radius: 10px;
+            padding: 10px 12px;
+            font-size: 13px;
+            font-weight: 700;
+            cursor: pointer;
+            text-align: center;
+            transition: all 0.15s;
+        }
+
+
+        .role-chip.selected {
+            border-color: var(--primary);
+            background: var(--primary-light);
+            color: var(--primary-dark);
+        }
+
+
+        /* 시뮬레이션 채팅 영역 */
+        .sim-chat-box {
+            background: #ffffff;
+            border: 1px solid #cbd5e1;
+            border-radius: var(--radius-lg);
+            overflow: hidden;
+            display: none;
+            flex-direction: column;
+        }
+
+
+        .sim-chat-header {
+            background: #0f172a;
+            color: #ffffff;
+            padding: 14px 18px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+
+        .sim-messages {
+            padding: 18px;
+            min-height: 280px;
+            max-height: 390px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            background: #f8fafc;
+        }
+
+
+        .msg-bubble {
+            max-width: 84%;
+            padding: 11px 15px;
+            border-radius: 14px;
+            font-size: 13.5px;
+            line-height: 1.55;
+            word-break: keep-all;
+        }
+
+
+        .msg-ai {
+            align-self: flex-start;
+            background: #ffffff;
+            border: 1px solid #e2e8f0;
+            color: #0f172a;
+        }
+
+
+        .msg-user {
+            align-self: flex-end;
+            background: var(--primary);
+            color: #ffffff;
+        }
+
+
+        .msg-coach {
+            align-self: center;
+            background: #fef3c7;
+            border: 1px solid #fcd34d;
+            color: #92400e;
+            max-width: 94%;
+            font-size: 12.5px;
+        }
+
+
+        .sim-input-bar {
+            padding: 12px 16px;
+            background: #ffffff;
+            border-top: 1px solid #e2e8f0;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+
+        .voice-icon-btn {
+            background: #f1f5f9;
+            color: #0f172a;
+            border: 1px solid #cbd5e1;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 16px;
+            cursor: pointer;
+            flex-shrink: 0;
+            transition: all 0.15s ease;
+        }
+
+
+        .voice-icon-btn:hover {
+            background: var(--primary-light);
+            border-color: var(--primary);
+            color: var(--primary-dark);
+        }
+
+
+        .voice-icon-btn.listening {
+            background: #fee2e2;
+            border-color: #ef4444;
+            color: #dc2626;
+        }
+
+
+        /* 전공 핵심 과목 탭 */
+        .major-tabs-bar {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-bottom: 18px;
+        }
+
+
+        .major-tab-btn {
+            background: #ffffff;
+            color: #475569;
+            border: 1.5px solid #cbd5e1;
+            padding: 8px 15px;
+            border-radius: 20px;
+            font-size: 13px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.18s ease;
+            white-space: nowrap;
+        }
+
+
+        .major-tab-btn:hover {
+            border-color: var(--primary);
+            color: var(--primary-dark);
+        }
+
+
+        .major-tab-btn.active {
+            background: var(--primary);
+            color: #ffffff;
+            border-color: var(--primary);
+            box-shadow: 0 4px 10px rgba(2, 132, 199, 0.25);
+        }
+
+
+        .major-cards-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 14px;
+        }
+
+
+        .major-note-card {
+            background: #ffffff;
+            border: 1px solid #e2e8f0;
+            border-radius: 12px;
+            padding: 18px;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.02);
+        }
+
+
+        .major-note-card h4 {
+            font-size: 15px;
+            font-weight: 800;
+            color: #0369a1;
+            margin-bottom: 8px;
+        }
+
+
+        .major-note-card p {
+            font-size: 13px;
+            color: #334155;
+            line-height: 1.6;
+            word-break: keep-all;
+        }
+
+
+        /* 술기 실습 영상 카드 */
+        .video-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+            gap: 18px;
+            width: 100%;
+        }
+
+
+        .video-card {
+            background: #ffffff;
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-md);
+            overflow: hidden;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+            transition: all 0.2s;
+            cursor: pointer;
+            display: flex;
+            flex-direction: column;
+        }
+
+
+        .video-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.08);
+            border-color: var(--primary);
+        }
+
+
+        .skill-thumb-box {
+            position: relative;
+            width: 100%;
+            height: 168px;
+            background-color: #0f172a;
+            background-size: cover;
+            background-position: center;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+        }
+
+
+        .thumb-overlay {
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(to top, rgba(15, 23, 42, 0.52) 0%, rgba(15, 23, 42, 0.16) 55%, rgba(15, 23, 42, 0.08) 100%);
+            transition: background 0.2s ease;
+        }
+
+
+        .video-card:hover .thumb-overlay {
+            background: linear-gradient(to top, rgba(15, 23, 42, 0.6) 0%, rgba(2, 132, 199, 0.22) 100%);
+        }
+
+
+        .thumb-icon-bg {
+            position: absolute;
+            font-size: 64px;
+            opacity: 0.16;
+            pointer-events: none;
+        }
+
+
+        .play-circle {
+            position: relative;
+            z-index: 2;
+            width: 46px;
+            height: 46px;
+            background: rgba(255, 255, 255, 0.94);
+            color: var(--primary-dark);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 17px;
+            padding-left: 3px;
+            box-shadow: 0 4px 14px rgba(0, 0, 0, 0.28);
+            transition: transform 0.2s, background 0.2s;
+        }
+
+
+        .video-card:hover .play-circle {
+            transform: scale(1.08);
+            background: var(--primary);
+            color: #ffffff;
+        }
+
+
+        .duration-tag {
+            position: absolute;
+            bottom: 10px;
+            right: 10px;
+            z-index: 2;
+            background: rgba(15, 23, 42, 0.85);
+            color: #ffffff;
+            font-size: 11px;
+            font-weight: 700;
+            padding: 3px 7px;
+            border-radius: 5px;
+        }
+
+
+        .ad-free-tag {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            z-index: 2;
+            background: rgba(2, 132, 199, 0.92);
+            color: #ffffff;
+            font-size: 10px;
+            font-weight: 800;
+            padding: 3px 8px;
+            border-radius: 5px;
+        }
+
+
+        .video-info {
+            padding: 14px 15px;
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+
+
+        .video-badge {
+            font-size: 11px;
+            font-weight: 700;
+            color: var(--primary-dark);
+            background: var(--primary-light);
+            padding: 2px 8px;
+            border-radius: 4px;
+            align-self: flex-start;
+        }
+
+
+        .video-title {
+            font-size: 14.5px;
+            font-weight: 800;
+            color: #0f172a;
+            line-height: 1.35;
+            word-break: keep-all;
+        }
+
+
+        .video-desc {
+            font-size: 12px;
+            color: var(--text-muted);
+            line-height: 1.45;
+            word-break: keep-all;
+        }
+
+
+        /* 유튜브 스타일 연속 영상 플레이어 */
+        .yt-stage {
+            position: relative;
+            width: 100%;
+            height: 295px;
+            background: #020617;
+            border-radius: 12px;
+            overflow: hidden;
+            margin-bottom: 12px;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-end;
+        }
+
+
+        .yt-video-visual {
+            position: absolute;
+            inset: 0;
+            background-size: cover;
+            background-position: center;
+            background-image: radial-gradient(circle at 25% 25%, rgba(56, 189, 248, 0.35), transparent 55%),
+                              linear-gradient(135deg, #0f172a 0%, #0369a1 52%, #0d9488 100%);
+            transform: scale(1);
+            transition: opacity 0.3s ease;
+        }
+
+
+        .yt-stage.is-playing .yt-video-visual {
+            animation: videoPanZoom 16s ease-in-out infinite alternate;
+        }
+
+
+        @keyframes videoPanZoom {
+            0% { transform: scale(1) translate(0, 0); }
+            50% { transform: scale(1.07) translate(-1.5%, -1%); }
+            100% { transform: scale(1.03) translate(1.5%, 1%); }
+        }
+
+
+        .yt-visual-overlay {
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(to top, rgba(2, 6, 23, 0.88) 0%, rgba(2, 6, 23, 0.25) 55%, rgba(2, 6, 23, 0.15) 100%);
+        }
+
+
+        .yt-live-badge {
+            position: absolute;
+            top: 14px;
+            left: 14px;
+            z-index: 3;
+            background: rgba(15, 23, 42, 0.72);
+            border: 1px solid rgba(255, 255, 255, 0.22);
+            color: #f8fafc;
+            font-size: 11px;
+            font-weight: 700;
+            padding: 4px 10px;
+            border-radius: 20px;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+
+        .yt-live-dot {
+            width: 7px;
+            height: 7px;
+            border-radius: 50%;
+            background: #ef4444;
+        }
+
+
+        .yt-caption-area {
+            position: relative;
+            z-index: 3;
+            padding: 18px 20px;
+            color: #ffffff;
+        }
+
+
+        .ad-close-btn {
+            background: rgba(255, 255, 255, 0.18);
+            color: #ffffff;
+            border: 1px solid rgba(255, 255, 255, 0.45);
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            font-size: 15px;
+            font-weight: 800;
+            cursor: pointer;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            transition: background 0.15s;
+        }
+
+
+        .ad-close-btn:hover {
+            background: rgba(255, 255, 255, 0.32);
+        }
+
+
+        /* 유튜브 진행 바 */
+        .yt-progress-section {
+            margin-bottom: 10px;
+        }
+
+
+        .yt-scrubber-track {
+            position: relative;
+            width: 100%;
+            height: 6px;
+            background: #334155;
+            border-radius: 999px;
+            cursor: pointer;
+        }
+
+
+        .yt-ad-marker {
+            position: absolute;
+            top: 0;
+            bottom: 0;
+            left: 38%;
+            width: 14px;
+            background: #facc15;
+            border-radius: 2px;
+            z-index: 2;
+            pointer-events: none;
+        }
+
+
+        .yt-scrubber-fill {
+            position: relative;
+            height: 100%;
+            background: #ef4444;
+            border-radius: 999px;
+            width: 0%;
+            z-index: 3;
+        }
+
+
+        .yt-scrubber-thumb {
+            position: absolute;
+            right: -6px;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 13px;
+            height: 13px;
+            border-radius: 50%;
+            background: #ef4444;
+            box-shadow: 0 0 0 2px rgba(239, 68, 68, 0.35);
+        }
+
+
+        .yt-time-under {
+            margin-top: 5px;
+            font-size: 11.5px;
+            font-weight: 700;
+            color: #475569;
+            font-variant-numeric: tabular-nums;
+        }
+
+
+        /* 한 줄 컨트롤 바 */
+        .yt-single-row-controls {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 10px;
+            padding-top: 4px;
+            flex-wrap: nowrap;
+        }
+
+
+        .yt-ctrl-group {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+
+        .yt-icon-btn {
+            background: #f1f5f9;
+            border: 1px solid #cbd5e1;
+            color: #0f172a;
+            height: 34px;
+            padding: 0 12px;
+            border-radius: 8px;
+            font-size: 13px;
+            font-weight: 800;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 4px;
+            white-space: nowrap;
+        }
+
+
+        .yt-icon-btn:hover {
+            background: #e2e8f0;
+        }
+
+
+        .yt-icon-btn.active-cc {
+            background: #0f172a;
+            color: #ffffff;
+            border-color: #0f172a;
+        }
+
+
+        .yt-speed-select {
+            height: 34px;
+            background: #f1f5f9;
+            border: 1px solid #cbd5e1;
+            border-radius: 8px;
+            padding: 0 10px;
+            font-size: 12.5px;
+            font-weight: 800;
+            color: #0f172a;
+            cursor: pointer;
+        }
+
+
+        /* 의료봉사 포스터 */
+        .poster-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 18px;
+        }
+
+
+        .poster-card {
+            background: #ffffff;
+            border-radius: var(--radius-lg);
+            border: 1px solid #cbd5e1;
+            overflow: hidden;
+            box-shadow: 0 6px 18px rgba(0, 0, 0, 0.06);
+            display: flex;
+            flex-direction: column;
+        }
+
+
+        .poster-header-banner {
+            padding: 18px 20px;
+            color: #ffffff;
+        }
+
+
+        .poster-region-badge {
+            display: inline-block;
+            background: rgba(255, 255, 255, 0.25);
+            padding: 3px 10px;
+            border-radius: 20px;
+            font-size: 11px;
+            font-weight: 700;
+            margin-bottom: 8px;
+        }
+
+
+        .poster-headline {
+            font-size: 16.5px;
+            font-weight: 800;
+            line-height: 1.35;
+            word-break: keep-all;
+        }
+
+
+        .poster-body {
+            padding: 18px;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+
+
+        .poster-info-list {
+            list-style: none;
+            font-size: 13px;
+            color: #334155;
+            margin-bottom: 16px;
+        }
+
+
+        .poster-info-list li {
+            margin-bottom: 8px;
+            display: flex;
+            gap: 8px;
+        }
+
+
+        .poster-info-label {
+            font-weight: 700;
+            color: #0f172a;
+            width: 66px;
+            flex-shrink: 0;
+        }
+
+
+        /* 모달 공통 */
+        .modal-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(15, 23, 42, 0.72);
+            backdrop-filter: blur(5px);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            padding: 16px;
+            pointer-events: auto;
+        }
+
+
+        .modal-overlay.open {
+            display: flex;
+        }
+
+
+        .modal-box {
+            background: #ffffff;
+            border-radius: var(--radius-lg);
+            width: 520px;
+            max-width: 100%;
+            max-height: 90vh;
+            overflow-y: auto;
+            padding: 24px;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.3);
+        }
+
+
+        .form-label {
+            font-size: 12px;
+            font-weight: 700;
+            color: #334155;
+            margin-bottom: 6px;
+            display: block;
+        }
+
+
+        .form-input,
+        .form-textarea {
+            width: 100%;
+            padding: 10px 13px;
+            border: 1px solid #cbd5e1;
+            border-radius: var(--radius-sm);
+            font-size: 13px;
+            margin-bottom: 13px;
+            outline: none;
+        }
+
+
+        .form-input:focus,
+        .form-textarea:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(2, 132, 199, 0.15);
+        }
+
+
+        .btn-primary {
+            width: 100%;
+            background: var(--primary);
+            color: #ffffff;
+            border: none;
+            padding: 11px 16px;
+            border-radius: var(--radius-sm);
+            font-size: 14px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+
+        .btn-primary:hover {
+            background: var(--primary-dark);
+        }
+
+
+        .btn-secondary {
+            background: #f1f5f9;
+            color: #334155;
+            border: 1px solid #cbd5e1;
+            padding: 9px 14px;
+            border-radius: var(--radius-sm);
+            font-size: 13px;
+            font-weight: 700;
+            cursor: pointer;
+        }
+
+
+        .comment-item {
+            background: #f8fafc;
+            padding: 10px 12px;
+            border-radius: 8px;
+            font-size: 13px;
+            margin-bottom: 8px;
+        }
+
+
+        .comment-author {
+            font-weight: 700;
+            color: var(--primary);
+            font-size: 12px;
+            margin-bottom: 2px;
+        }
+
+
+        .toast-popup {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) scale(0.95);
+            background: rgba(15, 23, 42, 0.95);
+            color: #ffffff;
+            padding: 15px 30px;
+            border-radius: 14px;
+            font-size: 15.5px;
+            font-weight: 700;
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.28);
+            z-index: 2500;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.22s ease, transform 0.22s ease;
+        }
+
+
+        .toast-popup.show {
+            opacity: 1;
+            transform: translate(-50%, -50%) scale(1);
+        }
+
+
+        .plan-card {
+            border: 1.5px solid #cbd5e1;
+            border-radius: 12px;
+            padding: 15px 17px;
+            margin-bottom: 12px;
+            background: #ffffff;
+        }
+
+
+        .plan-card-title {
+            font-size: 15px;
+            font-weight: 800;
+            color: #0f172a;
+            margin-bottom: 4px;
+        }
+
+
+        .plan-card-price {
+            font-size: 17px;
+            font-weight: 900;
+            color: #0284c7;
+            margin-bottom: 9px;
+        }
+
+
+        .plan-card.featured {
+            border: 2.5px solid #d97706;
+            background: linear-gradient(135deg, #fffbeb 0%, #fef3c7 100%);
+            box-shadow: 0 8px 20px rgba(217, 119, 6, 0.18);
+        }
+
+
+        .plan-card.featured .plan-card-title {
+            color: #78350f;
+            font-size: 16px;
+        }
+
+
+        .plan-card.featured .plan-card-price {
+            color: #b45309;
+            font-size: 19px;
+        }
+
+
+        .inline-alert {
+            margin-top: 12px;
+            padding: 10px 14px;
+            border-radius: 8px;
+            background: #fef2f2;
+            border: 1px solid #fecaca;
+            color: #b91c1c;
+            font-size: 12.5px;
+            font-weight: 700;
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <!-- 중앙 토스트 알림 -->
+    <div id="authToast" class="toast-popup">
+        <span>✅</span>
+        <span id="toastText">인증되었습니다</span>
+    </div>
+
+
+    <!-- 접이식 좌측 사이드바 -->
+    <aside class="sidebar collapsed" id="sidebar">
+        <div class="logo-area">
+            <div class="logo-icon" onclick="toggleSidebar()" title="사이드바 열기/접기">☝️</div>
+            <div class="logo-text">NurseTap</div>
+        </div>
+
+
+        <ul class="nav-menu">
+            <li class="nav-section-title">메인 홈</li>
+            <li class="nav-item active" onclick="switchTab('home', this)">
+                <span class="nav-icon">🏥</span>
+                <span class="nav-text">통합 플랫폼 홈</span>
+            </li>
+
+
+            <li class="nav-section-title">AI 임상 훈련</li>
+            <li class="nav-item" onclick="switchTab('ai-sim', this)">
+                <span class="nav-icon">🤖</span>
+                <span class="nav-text">AI임상 시뮬레이션</span>
+            </li>
+
+
+            <li class="nav-section-title">학업 &amp; 핵심술기</li>
+            <li class="nav-item" onclick="switchTab('video', this)">
+                <span class="nav-icon">📹</span>
+                <span class="nav-text">술기 실습 영상</span>
+            </li>
+            <li class="nav-item" onclick="switchTab('theory', this)">
+                <span class="nav-icon">📖</span>
+                <span class="nav-text">술기 프로토콜 요약</span>
+            </li>
+            <li class="nav-item" onclick="switchTab('nursing-core', this)">
+                <span class="nav-icon">💡</span>
+                <span class="nav-text">전공 핵심</span>
+            </li>
+
+
+            <li class="nav-section-title">커뮤니티</li>
+            <li class="nav-item" onclick="switchTab('community-student', this)">
+                <span class="nav-icon">💬</span>
+                <span class="nav-text">간호대생 커뮤니티</span>
+            </li>
+            <li class="nav-item" onclick="switchTab('community-job', this)">
+                <span class="nav-icon">💼</span>
+                <span class="nav-text">취업 정보 게시판</span>
+            </li>
+
+
+            <li class="nav-section-title">진로 &amp; 활동</li>
+            <li class="nav-item" onclick="switchTab('job-info', this)">
+                <span class="nav-icon">🏥</span>
+                <span class="nav-text">병원 지원 &amp; 특강</span>
+            </li>
+            <li class="nav-item" onclick="switchTab('volunteer', this)">
+                <span class="nav-icon">🤝</span>
+                <span class="nav-text">의료 봉사단 모집</span>
+            </li>
+        </ul>
+    </aside>
+
+
+    <!-- 메인 영역 -->
+    <div class="main-wrapper">
+        <header class="top-notice-bar">
+            <div class="header-left-group">
+                <button type="button" class="header-toggle-btn" onclick="toggleSidebar()" title="사이드바 열기/접기">
+                    <span id="toggleIcon">▶</span>
+                </button>
+                <div class="app-status-tag">
+                    <span class="status-dot"></span>
+                    <span>간호대생 실습 &amp; 취업 메이트 <strong>NurseTap</strong></span>
+                </div>
+            </div>
+            <div class="header-right-group">
+                <button type="button" id="premiumTopBtn" class="premium-top-btn" onclick="openPremiumModal()">
+                    <span>👑</span>
+                    <span id="premiumBtnLabel">프리미엄</span>
+                </button>
+                <div class="user-badge" id="topUserBadge" onclick="reopenAuthModal()" title="클릭하여 인증 정보 수정">
+                    <span>🎓 인증대기중 | 로그인 필요</span>
+                </div>
+            </div>
+        </header>
+
+
+        <main class="content-container">
+            <!-- 1. 메인 홈 탭 -->
+            <section id="home" class="tab-content active">
+                <div class="hero-banner">
+                    <div class="hero-left">
+                        <span class="hero-badge">간호학생 올인원 스마트 케어</span>
+                        <h2 class="hero-title-main">🩺 간호학습 &amp; 취업포털 널스탭</h2>
+                        <p class="hero-desc-text">간호대생의 핵심술기 실습과 AI 임상 시뮬레이션부터 전공 핵심 요약, 대학병원 취업 준비 및 의료봉사까지 한곳에서 지원하는 올인원 통합 플랫폼입니다.</p>
+                    </div>
+
+
+                    <div class="hero-dday-box">
+                        <div class="hero-dday-header">
+                            <span class="hero-dday-title">🎓 D-Day</span>
+                            <button type="button" class="hero-dday-edit" onclick="openDdayModal()">✏️ 수정</button>
+                        </div>
+                        <div class="hero-dday-row">
+                            <span class="hero-dday-label" id="ddayLabel1">기본간호 실습시험</span>
+                            <span class="hero-dday-pill" id="ddayVal1">D-14</span>
+                        </div>
+                        <div class="hero-dday-row">
+                            <span class="hero-dday-label" id="ddayLabel2">서울대병원 서류 마감</span>
+                            <span class="hero-dday-pill urgent" id="ddayVal2">D-3</span>
+                        </div>
+                    </div>
+                </div>
+
+
+                <!-- 4 퀵 타일 -->
+                <div class="app-tiles-grid">
+                    <div class="app-tile" onclick="switchTabByMenu('ai-sim')">
+                        <div class="tile-icon-box" style="background: #ede9fe; color: #7c3aed;">🤖</div>
+                        <div class="tile-info">
+                            <div class="tile-title">AI임상 시뮬레이션</div>
+                            <div class="tile-desc">환자·보호자 치료적 의사소통</div>
+                        </div>
+                    </div>
+
+
+                    <div class="app-tile" onclick="switchTabByMenu('video')">
+                        <div class="tile-icon-box" style="background: #e0f2fe; color: #0284c7;">📹</div>
+                        <div class="tile-info">
+                            <div class="tile-title">술기 영상 시청</div>
+                            <div class="tile-desc">활력징후, IV, 도뇨 실습 시연</div>
+                        </div>
+                    </div>
+
+
+                    <div class="app-tile" onclick="switchTabByMenu('theory')">
+                        <div class="tile-icon-box" style="background: #ccfbf1; color: #0d9488;">📖</div>
+                        <div class="tile-info">
+                            <div class="tile-title">프로토콜 요약</div>
+                            <div class="tile-desc">시험 직전 핵심 절차 노트</div>
+                        </div>
+                    </div>
+
+
+                    <div class="app-tile" onclick="switchTabByMenu('job-info')">
+                        <div class="tile-icon-box" style="background: #fce7f3; color: #db2777;">🏥</div>
+                        <div class="tile-info">
+                            <div class="tile-title">병원 입사 지원</div>
+                            <div class="tile-desc">채용 공고 및 특강 접수</div>
+                        </div>
+                    </div>
+                </div>
+
+
+                <!-- 대시보드 -->
+                <div class="horizontal-cards-row">
+                    <div class="widget-card">
+                        <div class="widget-header">
+                            <div class="widget-title">🔥 커뮤니티 실시간 인기글</div>
+                            <div class="widget-more" onclick="switchTabByMenu('community-student')">전체보기 &gt;</div>
+                        </div>
+                        <div class="post-list">
+                            <div class="post-item" onclick="openPost('유치도뇨 실습 평가 때 풍선 부풀리기 증류수 용량 질문이요!', '2학년 SN', '실습 평가 때 보통 몇 cc 주입해야 하나요? 멸균증류수 말고 식염수 쓰면 감점인가요?', '식염수 쓰시면 결정이 생겨 폐색 위험이 있어 감점 요인입니다! 보통 5~10cc 증류수를 사용합니다.')">
+                                <div class="post-item-main">
+                                    <div class="post-item-title">[기본간호] 유치도뇨 실습 평가 기준 질문드립니다.</div>
+                                </div>
+                                <div class="post-item-comment">댓글 4</div>
+                            </div>
+                            <div class="post-item" onclick="openPost('2027 상급종합병원 서류전형 스펙 질문 드립니다.', '취준SN', '토익 850 학점 3.8인데 빅5 병원 서류 가능할까요?', '충분히 가능성 있습니다! 자기소개서 스토리텔링에 집중하세요.')">
+                                <div class="post-item-main">
+                                    <div class="post-item-title">[취업정보] 2027 대학병원 신규간호사 합격 스펙 공유</div>
+                                </div>
+                                <div class="post-item-comment">댓글 8</div>
+                            </div>
+                            <div class="post-item" onclick="openPost('정맥수액주입(IV) 혈관 안 잡힐 때 팁 있나요?', '3학년 SN', '혈관이 얇거나 안 보이는 환자분 주사 놓을 때 팁 공유 부탁드립니다.', '혈관을 가볍게 두드리거나 따뜻한 찜질을 해주고, 투입 직전에 지혈대를 바짝 매는 것이 좋습니다.')">
+                                <div class="post-item-main">
+                                    <div class="post-item-title">[임상실습] 정맥수액주입(IV) 혈관 천자 노하우 및 팁</div>
+                                </div>
+                                <div class="post-item-comment">댓글 6</div>
+                            </div>
+                        </div>
+                    </div>
+
+
+                    <div class="widget-card">
+                        <div class="widget-header">
+                            <div class="widget-title">📢 포털 공지사항</div>
+                        </div>
+                        <ul class="notice-horizontal-list">
+                            <li class="notice-horizontal-item">
+                                <span>📌 2학기 기본간호학 실습실 오픈 안내</span>
+                                <span style="color: #94a3b8; font-size: 11px;">09.21</span>
+                            </li>
+                            <li class="notice-horizontal-item">
+                                <span>📌 하반기 대학병원 채용 설명회 개최</span>
+                                <span style="color: #94a3b8; font-size: 11px;">09.19</span>
+                            </li>
+                            <li class="notice-horizontal-item">
+                                <span>📌 해외 의료봉사단 봉사점수 인정 등록</span>
+                                <span style="color: #94a3b8; font-size: 11px;">09.15</span>
+                            </li>
+                            <li class="notice-horizontal-item">
+                                <span>📌 간호사 국가고시 실전 모의고사 접수</span>
+                                <span style="color: #94a3b8; font-size: 11px;">09.10</span>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </section>
+
+
+            <!-- 2. AI임상 시뮬레이션 탭 -->
+            <section id="ai-sim" class="tab-content">
+                <div class="sim-top-banner">
+                    <div>
+                        <span style="background: rgba(255,255,255,0.2); padding: 3px 10px; border-radius: 12px; font-size: 11px; font-weight: 800;">AI 임상 역할극 · 치료적 의사소통</span>
+                        <h3 style="font-size: 20px; font-weight: 800; margin-top: 6px;">🤖 AI임상 시뮬레이션</h3>
+                        <p style="font-size: 13px; color: #e0f2fe; margin-top: 2px;">케이스를 선택하고 <strong>시작하기</strong>를 누르면 AI 임상 대화가 시작됩니다.</p>
+                    </div>
+                    <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
+                        <button type="button" class="premium-top-btn" onclick="openPremiumModal()" style="padding: 8px 15px; font-size: 12.5px;">
+                            <span>👑</span>
+                            <span>프리미엄</span>
+                        </button>
+                        <span id="simTicketBadge" style="background: rgba(255,255,255,0.16); color: #ffffff; border: 1px solid rgba(255,255,255,0.3); padding: 6px 12px; border-radius: 20px; font-size: 12px; font-weight: 800;">🎟️ 무료 체험 1회 남음</span>
+                        <button type="button" class="btn-secondary" style="font-size: 12px; padding: 6px 12px;" onclick="buySingleTicket()">+ 1회권 (900원)</button>
+                    </div>
+                </div>
+
+
+                <div class="sim-setup-card" id="simSetupCard">
+                    <label class="form-label" style="font-size: 13px; margin-bottom: 10px;">1. 임상 케이스 선택</label>
+                    <div class="scenario-cards-grid" id="scenarioCardsGrid">
+                        <div class="scenario-card selected" data-scenario="preop" onclick="pickScenarioCard('preop', this)">
+                            <span class="scenario-dept">성인간호 · 수술 전 간호</span>
+                            <div class="scenario-title">복강경 담낭절제술<br />불안 환자</div>
+                            <div class="scenario-summary">마취와 수술 후 통증을 걱정하며<br />밤잠을 설치는 수술 전 대상자 대화</div>
+                        </div>
+
+
+                        <div class="scenario-card" data-scenario="medrefuse" onclick="pickScenarioCard('medrefuse', this)">
+                            <span class="scenario-dept">정신간호 · 투약 간호</span>
+                            <div class="scenario-title">부작용으로 투약을<br />거부하는 환자</div>
+                            <div class="scenario-summary">속 울렁거림과 졸림을 호소하며<br />아침 약 복용을 거부하는 대상자 중재</div>
+                        </div>
+
+
+                        <div class="scenario-card" data-scenario="peds" onclick="pickScenarioCard('peds', this)">
+                            <span class="scenario-dept">아동간호 · 응급 발열</span>
+                            <div class="scenario-title">39.2℃ 고열 환아와<br />다급한 보호자</div>
+                            <div class="scenario-summary">해열제 복용 후에도 열이 안 내려<br />열성경련을 걱정하는 보호자 응대</div>
+                        </div>
+
+
+                        <div class="scenario-card" data-scenario="fall" onclick="pickScenarioCard('fall', this)">
+                            <span class="scenario-dept">기본간호 · 낙상 예방</span>
+                            <div class="scenario-title">어지럼증 호소<br />낙상 고위험 환자</div>
+                            <div class="scenario-summary">침대 난간을 내리고 혼자 이동하려는<br />어지럼증 호소 고령 대상자 안전 간호</div>
+                        </div>
+                    </div>
+
+
+                    <!-- 프리미엄 전용 잠금 & 블러 영역 -->
+                    <div class="premium-sim-section" id="premiumSimSection">
+                        <div class="premium-lock-overlay" id="premiumLockOverlay">
+                            <span class="lock-pill-badge">🔒 프리미엄 전용 · 자율 작성 &amp; 심화 시뮬레이션</span>
+                            <p style="font-size: 12.5px; color: #ffffff; font-weight: 700;">프리미엄 구매 시 자율 케이스 작성과 심화 시뮬레이션이 잠금 해제됩니다.</p>
+                            <button type="button" class="btn-primary" style="width: auto; padding: 8px 16px; font-size: 12.5px; background: linear-gradient(135deg, #f59e0b, #d97706);" onclick="openPremiumModal()">👑 프리미엄 구매하고 잠금 해제</button>
+                        </div>
+
+
+                        <div class="premium-blur-content">
+                            <div style="font-size: 13.5px; font-weight: 800; color: #0f172a; margin-bottom: 12px;">👑 프리미엄 기능 · 자율 케이스 작성 &amp; 심화 시뮬레이션</div>
+                            <div class="premium-grid">
+                                <div style="background: #f8fafc; border: 1px solid #cbd5e1; border-radius: 12px; padding: 16px; min-width: 0;">
+                                    <div style="font-size: 13.5px; font-weight: 800; color: #0369a1; margin-bottom: 10px;">✍️ 자율 케이스 작성</div>
+                                    <label class="form-label" for="customCaseTitle">케이스 제목</label>
+                                    <input type="text" id="customCaseTitle" class="form-input" style="margin-bottom: 10px;" placeholder="예) 저혈당 쇼크 초기 대응" />
+                                    <label class="form-label" for="customCaseOpening">AI 환자/보호자 첫 대사</label>
+                                    <textarea id="customCaseOpening" class="form-textarea" rows="3" style="margin-bottom: 0; resize: vertical;" placeholder="AI 환자나 보호자가 먼저 건넬 상황과 첫 대사를 자유롭게 작성해 보세요."></textarea>
+                                </div>
+                                <div style="background: #f8fafc; border: 1px solid #cbd5e1; border-radius: 12px; padding: 16px; min-width: 0;">
+                                    <div style="font-size: 13.5px; font-weight: 800; color: #0d9488; margin-bottom: 10px;">⚡ 심화 시뮬레이션 선택</div>
+                                    <div class="scenario-card" data-scenario="custom_adv" onclick="pickScenarioCard('custom_adv', this)" style="margin-bottom: 0;">
+                                        <span class="scenario-dept">심화 · 복합 임상 악화</span>
+                                        <div class="scenario-title">자율 케이스 &amp; 응급 복합 악화</div>
+                                        <div class="scenario-summary">직접 입력한 상황이나 응급 악화에서<br />심층 디브리핑 피드백 훈련 진행</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+
+                    <label class="form-label">2. 나의 역할 선택</label>
+                    <div class="role-grid" id="userRoleGroup">
+                        <div class="role-chip selected" onclick="selectRole('user', '학생간호사 (SN)', this)">👩‍⚕️ 학생간호사 (SN)</div>
+                        <div class="role-chip" onclick="selectRole('user', '신규간호사 (RN)', this)">🩺 신규간호사 (RN)</div>
+                    </div>
+
+
+                    <label class="form-label">3. AI 상대 역할 선택</label>
+                    <div class="role-grid" id="aiRoleGroup">
+                        <div class="role-chip selected" onclick="selectRole('ai', '대상자 (환자)', this)">🤒 대상자 (환자)</div>
+                        <div class="role-chip" onclick="selectRole('ai', '보호자', this)">👪 보호자</div>
+                        <div class="role-chip" onclick="selectRole('ai', '프리셉터 간호사', this)">📋 프리셉터 간호사</div>
+                    </div>
+
+
+                    <button type="button" class="btn-primary" style="padding: 13px; font-size: 15px;" onclick="startSimulation()">▶️ 시작하기</button>
+                    <div id="simInlineAlert" class="inline-alert"></div>
+                </div>
+
+
+                <!-- 시뮬레이션 대화창 -->
+                <div class="sim-chat-box" id="simChatBox">
+                    <div class="sim-chat-header">
+                        <div>
+                            <div style="font-size: 14px; font-weight: 800;" id="simActiveTitle">시뮬레이션 진행 중</div>
+                            <div style="font-size: 11px; color: #94a3b8;" id="simActiveRoles">나: 학생간호사 | AI: 대상자</div>
+                        </div>
+                        <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+                            <button type="button" class="btn-secondary" style="padding: 6px 12px; font-size: 12px;" onclick="backToScenarioSelect()">↩ 케이스 다시 선택</button>
+                            <button type="button" class="btn-secondary" style="padding: 6px 12px; font-size: 12px;" onclick="triggerSuddenQuiz()">💡 돌발 퀴즈</button>
+                            <button type="button" class="btn-primary" style="width: auto; padding: 6px 14px; font-size: 12px; background: #0d9488;" onclick="finishSimulation()">📊 종료 및 피드백 리포트</button>
+                        </div>
+                    </div>
+
+
+                    <div class="sim-messages" id="simMessages"></div>
+
+
+                    <div id="suddenQuizPanel" style="display: none; background: #fffbeb; border-top: 1px solid #fcd34d; padding: 14px 18px;">
+                        <div style="font-size: 13px; font-weight: 800; color: #92400e; margin-bottom: 8px;" id="quizQuestionText">돌발 임상 퀴즈</div>
+                        <div id="quizOptionsList" style="display: flex; flex-direction: column; gap: 6px; margin-bottom: 8px;"></div>
+                        <button type="button" class="btn-secondary" style="font-size: 12px; padding: 6px 12px;" onclick="showQuizHint()">🙋‍♀️ 모르겠어요 (근거 및 해설 보기)</button>
+                    </div>
+
+
+                    <div class="sim-input-bar">
+                        <input type="text" id="simUserInput" class="form-input" style="flex: 1; margin-bottom: 0;" placeholder="치료적 의사소통 기법을 활용해 대답해 보세요..." onkeydown="if(event.key==='Enter') sendSimMessage()" />
+                        <button type="button" class="btn-primary" style="width: auto; padding: 10px 18px;" onclick="sendSimMessage()">전송</button>
+                        <button type="button" id="voiceMicBtn" class="voice-icon-btn" title="음성인식 입력" onclick="toggleVoiceRecognition()">🎤</button>
+                    </div>
+                </div>
+            </section>
+
+
+            <!-- 3. 핵심간호 술기 실습 영상 탭 -->
+            <section id="video" class="tab-content">
+                <div style="margin-bottom: 18px;">
+                    <h3 style="font-size: 20px; font-weight: 800; margin-bottom: 4px;">📹 핵심간호 술기 실습 영상</h3>
+                    <p style="font-size: 13px; color: var(--text-muted);">임상 가이드라인 기반 핵심 술기 시연 플레이어입니다. 카드를 누르면 영상이 재생됩니다.</p>
+                </div>
+
+
+                <div class="video-grid">
+                    <div class="video-card" onclick="playSkillVideo('vital')">
+                        <div class="skill-thumb-box" style="background-image: url('1000022066.jpg');">
+                            <div class="thumb-overlay"></div>
+                            <span class="ad-free-tag">핵심술기</span>
+                            <div class="play-circle">▶</div>
+                            <span class="duration-tag">07:15</span>
+                        </div>
+                        <div class="video-info">
+                            <span class="video-badge">핵심술기 01</span>
+                            <div class="video-title">활력징후 측정 (Vital Signs)</div>
+                            <div class="video-desc">상완동맥 촉지와 커프 착용 후<br />청진기로 혈압·활력징후 측정</div>
+                        </div>
+                    </div>
+
+
+                    <div class="video-card" onclick="playSkillVideo('iv')">
+                        <div class="skill-thumb-box" style="background-image: url('1000022070.jpg');">
+                            <div class="thumb-overlay"></div>
+                            <span class="ad-free-tag">핵심술기</span>
+                            <div class="play-circle">▶</div>
+                            <span class="duration-tag">09:40</span>
+                        </div>
+                        <div class="video-info">
+                            <span class="video-badge">핵심술기 02</span>
+                            <div class="video-title">정맥수액주입 및 투약 (IV)</div>
+                            <div class="video-desc">무균적 약물 준비와 말초정맥 천자,<br />처방된 수액 방울 속도 조절 절차</div>
+                        </div>
+                    </div>
+
+
+                    <div class="video-card" onclick="playSkillVideo('suction')">
+                        <div class="skill-thumb-box" style="background-image: url('1000022077.png');">
+                            <div class="thumb-overlay"></div>
+                            <span class="ad-free-tag">핵심술기</span>
+                            <div class="play-circle">▶</div>
+                            <span class="duration-tag">08:12</span>
+                        </div>
+                        <div class="video-info">
+                            <span class="video-badge">핵심술기 03</span>
+                            <div class="video-title">기관 내 흡인 (Suction)</div>
+                            <div class="video-desc">멸균 장갑 착용과 흡인 압력 점검,<br />10~15초 이내 무균 흡인 수칙</div>
+                        </div>
+                    </div>
+
+
+                    <div class="video-card" onclick="playSkillVideo('indwelling')">
+                        <div class="skill-thumb-box" style="background-image: url('1000022078.png');">
+                            <div class="thumb-overlay"></div>
+                            <span class="ad-free-tag">핵심술기</span>
+                            <div class="play-circle">▶</div>
+                            <span class="duration-tag">10:25</span>
+                        </div>
+                        <div class="video-info">
+                            <span class="video-badge">핵심술기 04</span>
+                            <div class="video-title">유치도뇨 (Indwelling)</div>
+                            <div class="video-desc">멸균 도뇨 세트 준비와 도뇨관 삽입,<br />멸균증류수 풍선 고정 및 관리</div>
+                        </div>
+                    </div>
+
+
+                    <div class="video-card" onclick="playSkillVideo('straight')">
+                        <div class="skill-thumb-box" style="background-image: url('1000022082.png');">
+                            <div class="thumb-overlay"></div>
+                            <span class="ad-free-tag">핵심술기</span>
+                            <div class="play-circle">▶</div>
+                            <span class="duration-tag">06:50</span>
+                        </div>
+                        <div class="video-info">
+                            <span class="video-badge">핵심술기 05</span>
+                            <div class="video-title">단순도뇨 (Straight)</div>
+                            <div class="video-desc">잔뇨량 측정과 급성 방광 팽만 완화를<br />위한 무균적 단순도뇨 수행 절차</div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+
+            <!-- 4. 술기 프로토콜 요약 -->
+            <section id="theory" class="tab-content">
+                <h3 style="font-size: 20px; font-weight: 800; margin-bottom: 4px;">📖 술기 프로토콜 요약</h3>
+                <p style="font-size: 13px; color: var(--text-muted); margin-bottom: 18px;">술기 시험 평가 시 꼭 점검해야 할 핵심 요약 가이드입니다.</p>
+
+
+                <div style="display: flex; flex-direction: column; gap: 12px;">
+                    <div style="background: #ffffff; border-radius: 12px; padding: 18px; border: 1px solid #e2e8f0;">
+                        <h4 style="font-size: 15.5px; font-weight: 700; color: #0284c7; margin-bottom: 6px;">1. 🩺 활력징후 측정 (Vital Signs)</h4>
+                        <p style="font-size: 13px; color: #334155;"><strong>• 핵심:</strong> 상완동맥 위치 확인 후 팔꿈치 위 2~3cm에 커프 착용, 맥박 소실 지점에서 30mmHg 더 가압 후 초당 2~3mmHg 속도로 감압.</p>
+                    </div>
+                    <div style="background: #ffffff; border-radius: 12px; padding: 18px; border: 1px solid #e2e8f0;">
+                        <h4 style="font-size: 15.5px; font-weight: 700; color: #0284c7; margin-bottom: 6px;">2. 💉 정맥수액주입 (IV Infusion)</h4>
+                        <p style="font-size: 13px; color: #334155;"><strong>• 핵심:</strong> 사침 각도 15~30도 유지, 역혈 확인 후 카테터를 밀어 넣고 지혈대를 먼저 푼 뒤 수액 세트 연결.</p>
+                    </div>
+                    <div style="background: #ffffff; border-radius: 12px; padding: 18px; border: 1px solid #e2e8f0;">
+                        <h4 style="font-size: 15.5px; font-weight: 700; color: #0284c7; margin-bottom: 6px;">3. 💨 기관 내 흡인 (Endotracheal Suction)</h4>
+                        <p style="font-size: 13px; color: #334155;"><strong>• 수칙:</strong> 흡인 압력 80~120mmHg(성인), 1회 흡인 시간 10~15초 이내 제한(저산소혈증 예방), 카테터 회전시키며 제거.</p>
+                    </div>
+                    <div style="background: #ffffff; border-radius: 12px; padding: 18px; border: 1px solid #e2e8f0;">
+                        <h4 style="font-size: 15.5px; font-weight: 700; color: #0284c7; margin-bottom: 6px;">4. 🩺 유치도뇨 (Indwelling Catheterization)</h4>
+                        <p style="font-size: 13px; color: #334155;"><strong>• 주의사항:</strong> Ballooning 시 반드시 멸균증류수 사용(생리식염수는 결정화로 카테터 폐색 유발), 소변주머니는 방광보다 아래 유지.</p>
+                    </div>
+                    <div style="background: #ffffff; border-radius: 12px; padding: 18px; border: 1px solid #e2e8f0;">
+                        <h4 style="font-size: 15.5px; font-weight: 700; color: #0284c7; margin-bottom: 6px;">5. 🎈 단순도뇨 (Straight Catheterization)</h4>
+                        <p style="font-size: 13px; color: #334155;"><strong>• 목적:</strong> 급성 방광 팽만 완화, 배뇨 후 잔뇨량 측정, 무균적 소변 검사물 채취.</p>
+                    </div>
+                </div>
+            </section>
+
+
+            <!-- 5. 전공 핵심 (과목별 탭) -->
+            <section id="nursing-core" class="tab-content">
+                <h3 style="font-size: 20px; font-weight: 800; margin-bottom: 4px;">💡 전공 핵심</h3>
+                <p style="font-size: 13px; color: var(--text-muted); margin-bottom: 16px;">과목 탭을 눌러 중간/기말고사 및 국시 대비 핵심 개념을 확인하세요.</p>
+
+
+                <div class="major-tabs-bar" id="majorTabsBar">
+                    <button type="button" class="major-tab-btn active" onclick="renderMajorSubject('fundamental', this)">기본간호</button>
+                    <button type="button" class="major-tab-btn" onclick="renderMajorSubject('adult', this)">성인간호</button>
+                    <button type="button" class="major-tab-btn" onclick="renderMajorSubject('pharmacology', this)">약리학</button>
+                    <button type="button" class="major-tab-btn" onclick="renderMajorSubject('pathology', this)">병리학</button>
+                    <button type="button" class="major-tab-btn" onclick="renderMajorSubject('physiology', this)">생리학</button>
+                    <button type="button" class="major-tab-btn" onclick="renderMajorSubject('pediatric', this)">아동간호</button>
+                </div>
+
+
+                <div class="major-cards-grid" id="majorCardsContainer"></div>
+            </section>
+
+
+            <!-- 6. 간호대생 커뮤니티 -->
+            <section id="community-student" class="tab-content">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; gap: 10px; flex-wrap: wrap;">
+                    <div>
+                        <h3 style="font-size: 20px; font-weight: 800;">💬 간호대생 커뮤니티</h3>
+                        <p style="font-size: 13px; color: var(--text-muted);">핵심술기, 병동 실습, 시험 및 국시 대비 노하우를 함께 나눠보세요.</p>
+                    </div>
+                    <button type="button" class="btn-primary" style="width: auto; padding: 9px 18px;" onclick="openWriteModal()">✏️ 글쓰기</button>
+                </div>
+
+
+                <div class="post-list" id="studentPostList">
+                    <div class="post-item" onclick="openPost('[자유게시판] 유치도뇨 실습 평가 기준 질문드립니다.', '2학년 SN · 10분 전', '실습 평가 때 보통 몇 cc 주입해야 하나요? 멸균증류수 말고 식염수 쓰면 감점인가요?', '식염수 쓰시면 결정이 생겨 폐색 위험이 있어 감점 요인입니다! 보통 5~10cc 증류수를 사용합니다.')">
+                        <div class="post-item-main">
+                            <div class="post-item-title">[자유게시판] 유치도뇨 실습 평가 기준 질문드립니다.</div>
+                            <div class="post-item-meta">2학년 SN · 조회 142 · 핵심술기</div>
+                        </div>
+                        <div class="post-item-comment">댓글 4</div>
+                    </div>
+                    <div class="post-item" onclick="openPost('[임상실습] 정맥수액주입(IV) 혈관 안 잡힐 때 팁 있나요?', '3학년 SN · 35분 전', '혈관이 얇거나 안 보이는 환자분 주사 놓을 때 팁 공유 부탁드립니다.', '혈관을 가볍게 두드리거나 따뜻한 찜질을 해주고, 투입 직전에 지혈대를 바짝 매는 것이 좋습니다.')">
+                        <div class="post-item-main">
+                            <div class="post-item-title">[임상실습] 정맥수액주입(IV) 혈관 안 잡힐 때 팁 있나요?</div>
+                            <div class="post-item-meta">3학년 SN · 조회 218 · 성인·기본실습</div>
+                        </div>
+                        <div class="post-item-comment">댓글 6</div>
+                    </div>
+                    <div class="post-item" onclick="openPost('[학업팁] 기본간호학 수액 gtt 계산법 정리', '2학년 SN · 1시간 전', '수액 방울 수 gtt 공식 헷갈리시는 분들 참고하세요. (총 주입량 × 드롭팩터) ÷ 시간(분)', '정말 유용해요! 시험 전날 이 공식만 다시 봐도 머리에 딱 들어오네요.')">
+                        <div class="post-item-main">
+                            <div class="post-item-title">[학업팁] 기본간호학 수액 gtt 계산법 정리</div>
+                            <div class="post-item-meta">2학년 SN · 조회 189 · 약물·수액계산</div>
+                        </div>
+                        <div class="post-item-comment">댓글 3</div>
+                    </div>
+                    <div class="post-item" onclick="openPost('[병동실습] 정신간호학 치료적 의사소통 실습 후기 및 팁', '3학년 SN · 2시간 전', '환자분 말에 바로 해결책 주기보다 감정을 먼저 받아주는 연습이 정말 중요하더라고요.', '공감해주고 열린 질문으로 이어가니까 대상자분 표정이 확실히 달라졌어요.')">
+                        <div class="post-item-main">
+                            <div class="post-item-title">[병동실습] 정신간호학 치료적 의사소통 실습 후기 및 팁</div>
+                            <div class="post-item-meta">3학년 SN · 조회 164 · 정신간호</div>
+                        </div>
+                        <div class="post-item-comment">댓글 7</div>
+                    </div>
+                </div>
+            </section>
+
+
+            <!-- 7. 취업 정보 게시판 -->
+            <section id="community-job" class="tab-content">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; gap: 10px; flex-wrap: wrap;">
+                    <div>
+                        <h3 style="font-size: 20px; font-weight: 800;">💼 취업 정보 게시판</h3>
+                        <p style="font-size: 13px; color: var(--text-muted);">상급종합병원 채용 일정, 자소서 작성 팁, 면접 후기 및 오프·교대근무 정보를 공유하세요.</p>
+                    </div>
+                    <button type="button" class="btn-primary" style="width: auto; padding: 9px 18px;" onclick="openWriteModal()">✏️ 글쓰기</button>
+                </div>
+
+
+                <div class="post-list">
+                    <div class="post-item" onclick="openPost('[취업질문] 2027 상급종합병원 서류전형 스펙 질문 드립니다.', '취준SN · 20분 전', '토익 850 학점 3.8인데 빅5 및 상급종합병원 서류 가능할까요? 교내 활동이랑 봉사 경험이 있습니다.', '충분히 가능성 있습니다! 실습 에피소드와 지원 동기 연결성이 핵심이에요.')">
+                        <div class="post-item-main">
+                            <div class="post-item-title">[취업질문] 2027 상급종합병원 서류전형 스펙 질문 드립니다.</div>
+                            <div class="post-item-meta">취준SN · 조회 276 · 서류·스펙</div>
+                        </div>
+                        <div class="post-item-comment">댓글 8</div>
+                    </div>
+                    <div class="post-item" onclick="openPost('[면접후기] 서울대병원 AI 및 심층면접 기출문제 후기', '합격자SN · 1시간 전', '작년 서울대병원 인성 및 직무면접 질문 복기와 답변 구성 팁 공유합니다.', '면접 준비에 정말 도움됩니다. 감사해요!')">
+                        <div class="post-item-main">
+                            <div class="post-item-title">[면접후기] 서울대병원 AI 및 심층면접 기출문제 후기</div>
+                            <div class="post-item-meta">합격자SN · 조회 419 · 면접후기</div>
+                        </div>
+                        <div class="post-item-comment">댓글 12</div>
+                    </div>
+                    <div class="post-item" onclick="openPost('[자소서팁] 임상실습 경험으로 갈등 해결·팀워크 항목 쓰는 법', '4학년 SN · 3시간 전', '병동 실습에서 의료진·동료와 소통하며 문제를 해결했던 구체적 행동과 결과를 중심으로 적어보세요.', '추상적인 다짐보다 실제 병동에서 겪은 상황 묘사가 훨씬 설득력 있네요.')">
+                        <div class="post-item-main">
+                            <div class="post-item-title">[자소서팁] 임상실습 경험으로 갈등 해결·팀워크 항목 쓰는 법</div>
+                            <div class="post-item-meta">4학년 SN · 조회 234 · 자기소개서</div>
+                        </div>
+                        <div class="post-item-comment">댓글 6</div>
+                    </div>
+                </div>
+            </section>
+
+
+            <!-- 8. 병원 지원 & 특강 -->
+            <section id="job-info" class="tab-content">
+                <h3 style="font-size: 20px; font-weight: 800; margin-bottom: 4px;">🏥 병원 지원 &amp; 취업 특강</h3>
+                <p style="font-size: 13px; color: var(--text-muted); margin-bottom: 18px;">원하는 공고의 지원하기 버튼을 눌러 인적사항 확인 후 접수하세요.</p>
+
+
+                <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(270px, 1fr)); gap: 18px;">
+                    <div style="background: #ffffff; border: 1px solid #cbd5e1; border-radius: 14px; padding: 18px;">
+                        <span style="background: #ef4444; color: #ffffff; font-size: 11px; font-weight: 700; padding: 3px 8px; border-radius: 4px;">마감 임박 (D-3)</span>
+                        <h4 style="font-size: 16.5px; font-weight: 700; margin: 10px 0 6px; color: #0f172a;">서울대학교병원 2027 신규간호사 채용</h4>
+                        <p style="font-size: 13px; color: var(--text-muted); margin-bottom: 14px;">모집인원: 000명 | 마감일: ~ 09.28까지</p>
+                        <button type="button" class="btn-primary" onclick="openApplyModal('서울대학교병원 신규간호사 채용')">📝 병원 입사 지원하기</button>
+                    </div>
+
+
+                    <div style="background: #ffffff; border: 1px solid #cbd5e1; border-radius: 14px; padding: 18px;">
+                        <span style="background: #0284c7; color: #ffffff; font-size: 11px; font-weight: 700; padding: 3px 8px; border-radius: 4px;">상시 채용</span>
+                        <h4 style="font-size: 16.5px; font-weight: 700; margin: 10px 0 6px; color: #0f172a;">신촌 세브란스병원 신규간호사 채용</h4>
+                        <p style="font-size: 13px; color: var(--text-muted); margin-bottom: 14px;">모집인원: 000명 | 기독교 정신 우수자 우대</p>
+                        <button type="button" class="btn-primary" onclick="openApplyModal('신촌 세브란스병원 채용')">📝 병원 입사 지원하기</button>
+                    </div>
+
+
+                    <div style="background: #ffffff; border: 1px solid #cbd5e1; border-radius: 14px; padding: 18px;">
+                        <span style="background: #0369a1; color: #ffffff; font-size: 11px; font-weight: 700; padding: 3px 8px; border-radius: 4px;">특강 신청</span>
+                        <h4 style="font-size: 16.5px; font-weight: 700; margin: 10px 0 6px; color: #0f172a;">2026 간호학과 취업 성공 자소서 특강</h4>
+                        <p style="font-size: 13px; color: var(--text-muted); margin-bottom: 14px;">일시: 10월 5일 온라인 Zoom | 전직 병원 인사담당자</p>
+                        <button type="button" class="btn-primary" style="background: #0369a1;" onclick="openApplyModal('취업 성공 자소서 특강')">🎓 특강 참가 신청하기</button>
+                    </div>
+                </div>
+            </section>
+
+
+            <!-- 9. 의료 봉사단 모집 -->
+            <section id="volunteer" class="tab-content">
+                <h3 style="font-size: 20px; font-weight: 800; margin-bottom: 4px;">🤝 의료 &amp; 간호 봉사단 모집</h3>
+                <p style="font-size: 13px; color: var(--text-muted); margin-bottom: 18px;">지역, 일시, 장소, 활동 내용이 정리된 모집 공고입니다.</p>
+
+
+                <div class="poster-grid">
+                    <div class="poster-card">
+                        <div class="poster-header-banner" style="background: linear-gradient(135deg, #0d9488, #0f766e);">
+                            <span class="poster-region-badge">📍 동남아 (베트남/캄보디아)</span>
+                            <div class="poster-headline">2026 동계 해외 의료 봉사단 단원 모집</div>
+                        </div>
+                        <div class="poster-body">
+                            <ul class="poster-info-list">
+                                <li><span class="poster-info-label">📅 일시:</span> 2026년 12월 15일 ~ 12월 24일</li>
+                                <li><span class="poster-info-label">🏫 장소:</span> 베트남 다낭 및 인근 오지 마을</li>
+                                <li><span class="poster-info-label">🩺 활동:</span> 기초 건강검진 보조, 위생교육</li>
+                            </ul>
+                            <button type="button" class="btn-primary" style="background: #0d9488;" onclick="openApplyModal('동남아 해외 의료봉사단')">봉사단 지원 신청하기</button>
+                        </div>
+                    </div>
+
+
+                    <div class="poster-card">
+                        <div class="poster-header-banner" style="background: linear-gradient(135deg, #0284c7, #0369a1);">
+                            <span class="poster-region-badge">📍 인천 / 경기 지역</span>
+                            <div class="poster-headline">지역사회 어르신 만성질환 케어 봉사단</div>
+                        </div>
+                        <div class="poster-body">
+                            <ul class="poster-info-list">
+                                <li><span class="poster-info-label">📅 일시:</span> 2026년 10월~11월 매주 토요일</li>
+                                <li><span class="poster-info-label">🏫 장소:</span> 인천 미추홀구 종합사회복지관</li>
+                                <li><span class="poster-info-label">🩺 활동:</span> 어르신 혈압/혈당 측정, 건강상담 지원</li>
+                            </ul>
+                            <button type="button" class="btn-primary" onclick="openApplyModal('인천 지역 어르신 봉사단')">봉사단 지원 신청하기</button>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+
+
+    <!-- 1. 초기 학생 인증 모달 (빈 입력창 + placeholder 형식 안내) -->
+    <div class="modal-overlay open" id="authModal" style="display: flex;">
+        <div class="modal-box" style="width: 440px;">
+            <div style="text-align: center; margin-bottom: 18px;">
+                <div style="width: 54px; height: 54px; background: #e0f2fe; color: #0284c7; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 26px; margin: 0 auto 10px;">🩺</div>
+                <h3 style="font-size: 18px; font-weight: 800; color: #0f172a;">간호학생 인증</h3>
+                <p style="font-size: 12px; color: var(--text-muted); margin-top: 4px;">NurseTap 포털은 간호대생 전용 공간입니다.</p>
+            </div>
+
+
+            <label class="form-label" for="authName">이름</label>
+            <input type="text" id="authName" class="form-input" value="" placeholder="예) 김간호" />
+
+
+            <label class="form-label" for="authSchoolDept">학교 및 학과</label>
+            <input type="text" id="authSchoolDept" class="form-input" value="" placeholder="예) 경인여대 간호학과" />
+
+
+            <label class="form-label" for="authId">학번</label>
+            <input type="text" id="authId" class="form-input" value="" placeholder="예) 12345678" />
+
+
+            <button type="button" id="authSubmitBtn" class="btn-primary" onclick="submitAuthInfo()">인증하기</button>
+        </div>
+    </div>
+
+
+    <!-- D-Day 수정 모달 -->
+    <div class="modal-overlay" id="ddayModal">
+        <div class="modal-box" style="width: 420px;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+                <h3 style="font-size: 17px; font-weight: 800; color: #0f172a;">🎓 D-Day 수정</h3>
+                <span style="font-size: 18px; cursor: pointer; color: #94a3b8;" onclick="closeDdayModal()">✕</span>
+            </div>
+            <label class="form-label" for="editDdayLabel1">일정 1 제목</label>
+            <input type="text" id="editDdayLabel1" class="form-input" value="기본간호 실습시험" />
+            <label class="form-label" for="editDdayVal1">일정 1 디데이</label>
+            <input type="text" id="editDdayVal1" class="form-input" value="D-14" />
+
+
+            <label class="form-label" for="editDdayLabel2">일정 2 제목</label>
+            <input type="text" id="editDdayLabel2" class="form-input" value="서울대병원 서류 마감" />
+            <label class="form-label" for="editDdayVal2">일정 2 디데이</label>
+            <input type="text" id="editDdayVal2" class="form-input" value="D-3" />
+
+
+            <button type="button" class="btn-primary" onclick="saveDday()">저장하기</button>
+        </div>
+    </div>
+
+
+    <!-- 유튜브 스타일 연속 재생 술기 영상 플레이어 모달 -->
+    <div class="modal-overlay" id="skillVideoModal">
+        <div class="modal-box" style="width: 640px;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+                <h3 id="skillVideoTitle" style="font-size: 17px; font-weight: 800; color: #0f172a;">술기 시연 영상</h3>
+                <span style="font-size: 20px; cursor: pointer; color: #94a3b8;" onclick="closeSkillVideoModal()">✕</span>
+            </div>
+
+
+            <div id="ytStage" class="yt-stage">
+                <div class="yt-video-visual" id="ytVideoVisual"></div>
+                <div class="yt-visual-overlay"></div>
+
+
+                <div class="yt-live-badge">
+                    <span class="yt-live-dot"></span>
+                    <span id="ytLiveStepTag">시연 영상 재생 중 · STEP 1</span>
+                </div>
+
+
+                <div class="yt-caption-area">
+                    <div id="playerStepTitle" style="font-size: 17px; font-weight: 800; margin-bottom: 6px;">1단계: 손위생 및 대상자 확인</div>
+                    <div id="playerStepDesc" style="font-size: 12.5px; color: #e2e8f0; background: rgba(15, 23, 42, 0.72); display: inline-block; padding: 4px 10px; border-radius: 6px;">손소독제로 손위생을 실시하고 대상자의 이름과 등록번호를 확인합니다.</div>
+                </div>
+
+
+                <!-- 비프리미엄 3초 광고 오버레이 (카운트다운 후 우측 상단 ✕ 버튼 활성화) -->
+                <div id="sponsorAdOverlay" style="display: none; position: absolute; inset: 0; z-index: 10; background: rgba(15, 23, 42, 0.96); color: #ffffff; padding: 22px 24px; flex-direction: column; justify-content: space-between;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; gap: 10px;">
+                        <span style="background: #f59e0b; color: #0f172a; font-size: 11px; font-weight: 900; padding: 3px 9px; border-radius: 4px;">SPONSORED 제휴 광고</span>
+                        <div style="display: flex; align-items: center; gap: 8px;">
+                            <span id="adCountdownText" style="font-size: 12px; color: #fbbf24; font-weight: 800;">3초 후 닫기 가능</span>
+                            <button type="button" id="adCloseBtn" class="ad-close-btn" title="광고 닫고 영상 재생" onclick="closeSponsorAdAndPlay()">✕</button>
+                        </div>
+                    </div>
+
+
+                    <div style="text-align: center;">
+                        <div id="adSponsorTag" style="font-size: 12px; color: #38bdf8; font-weight: 700; margin-bottom: 6px;">의료기기 · 실습물품 제휴</div>
+                        <div id="adHeadline" style="font-size: 18px; font-weight: 800; margin-bottom: 8px;">🩺 간호대생 실습 필수템! 듀얼 헤드 청진기 &amp; 펜라이트 세트</div>
+                        <div id="adSubcopy" style="font-size: 12.5px; color: #cbd5e1;">전국 간호학과 학생 인증 시 학생할인가 25% 즉시 적용</div>
+                    </div>
+
+
+                    <div style="display: flex; justify-content: center;">
+                        <button type="button" class="btn-primary" style="width: auto; font-size: 12px; background: linear-gradient(135deg, #f59e0b, #d97706);" onclick="openPremiumModal()">👑 프리미엄으로 광고 없이 바로 시청</button>
+                    </div>
+                </div>
+            </div>
+
+
+            <!-- 유튜브 스타일 진행 바 -->
+            <div class="yt-progress-section">
+                <div class="yt-scrubber-track" id="ytScrubberBar" onclick="seekVideoByBar(event)">
+                    <div class="yt-ad-marker" title="광고 구간"></div>
+                    <div class="yt-scrubber-fill" id="ytScrubberFill">
+                        <div class="yt-scrubber-thumb"></div>
+                    </div>
+                </div>
+                <div class="yt-time-under" id="ytTimeLabel">00:00 / 07:15</div>
+            </div>
+
+
+            <!-- 한 줄 컨트롤 바 -->
+            <div class="yt-single-row-controls">
+                <div class="yt-ctrl-group">
+                    <button type="button" class="yt-icon-btn" id="ytPlayPauseBtn" onclick="togglePlayPause()">⏸</button>
+                    <button type="button" class="yt-icon-btn" title="이전 구간" onclick="jumpSkillStep(-1)">⏮</button>
+                    <button type="button" class="yt-icon-btn" title="다음 구간" onclick="jumpSkillStep(1)">⏭</button>
+                </div>
+                <div class="yt-ctrl-group">
+                    <button type="button" class="yt-icon-btn active-cc" id="ytCaptionBtn" onclick="toggleCaptions()">CC</button>
+                    <select class="yt-speed-select" id="ytSpeedSelect" title="재생 배속" onchange="changePlaybackSpeed()">
+                        <option value="0.75">0.75x</option>
+                        <option value="1" selected>1.0x</option>
+                        <option value="1.25">1.25x</option>
+                        <option value="1.5">1.5x</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <!-- 멤버십 이용권 안내 모달 -->
+    <div class="modal-overlay" id="premiumModal">
+        <div class="modal-box" style="width: 490px;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px;">
+                <h3 style="font-size: 18px; font-weight: 800; color: #0f172a; white-space: nowrap;">👑 멤버십 이용권 안내</h3>
+                <span style="font-size: 18px; cursor: pointer; color: #94a3b8;" onclick="closePremiumModal()">✕</span>
+            </div>
+            <p style="font-size: 13px; color: var(--text-muted); margin-bottom: 15px;">광고 없는 쾌적한 술기 학습과 AI 임상 시뮬레이션 무제한·심층 리포트를 경험하세요.</p>
+
+
+            <div class="plan-card">
+                <div class="plan-card-title">NurseTap Plus (월간 구독)</div>
+                <div class="plan-card-price">월 4,900원</div>
+                <p style="font-size: 12px; color: #475569; margin-bottom: 10px;">• 모든 핵심술기 영상·앱 내 광고 완전 제거<br />• <strong>AI 시뮬레이션 무제한 &amp; 심층 디브리핑 리포트</strong><br />• 심화 술기·전공 요약 노트 전체 열람</p>
+                <button type="button" class="btn-primary" style="padding: 9px;" onclick="activatePremium('월 4,900원 Plus')">월 4,900원으로 시작하기</button>
+            </div>
+
+
+            <div class="plan-card featured">
+                <div style="display: inline-block; background: #d97706; color: #ffffff; font-size: 10px; font-weight: 900; padding: 2px 8px; border-radius: 6px; margin-bottom: 6px;">★ 추천 · 25% 할인 강조 이용권</div>
+                <div class="plan-card-title">🎓 실습 패스 (1학기 / 4개월)</div>
+                <div class="plan-card-price">14,900원</div>
+                <p style="font-size: 12px; color: #78350f; margin-bottom: 12px;">• Plus의 모든 혜택 120일 제공 (광고 제거 + <strong>시뮬레이션 무제한·심층 리포트</strong>)<br />• 병원별 임상실습 꿀팁 및 면접 기출 아카이브 추가 제공</p>
+                <button type="button" class="btn-primary" style="padding: 10px; background: linear-gradient(135deg, #d97706, #b45309);" onclick="activatePremium('1학기 실습 패스 14,900원')">14,900원 학기권 구독하기</button>
+            </div>
+
+
+            <div class="plan-card" style="margin-bottom: 0;">
+                <div class="plan-card-title">🎟️ AI 심화 시뮬레이션 1회 이용권</div>
+                <div class="plan-card-price" style="color: #0d9488;">900원</div>
+                <p style="font-size: 12px; color: #475569; margin-bottom: 10px;">• 구독 부담 없이 AI 임상 시뮬레이션 1회 즉시 이용 + 심층 리포트 제공</p>
+                <button type="button" class="btn-secondary" style="width: 100%;" onclick="buySingleTicketFromModal()">1회 이용권 충전 (900원)</button>
+            </div>
+        </div>
+    </div>
+
+
+    <!-- 디브리핑 리포트 모달 -->
+    <div class="modal-overlay" id="reportModal">
+        <div class="modal-box">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+                <h3 style="font-size: 17px; font-weight: 800; color: #0f172a;">📊 AI 임상 시뮬레이션 피드백 리포트</h3>
+                <span style="font-size: 18px; cursor: pointer; color: #94a3b8;" onclick="closeReportModal()">✕</span>
+            </div>
+            <div id="reportBodyContent" style="font-size: 13px; color: #334155; line-height: 1.65; background: #f8fafc; padding: 16px; border-radius: 10px; margin-bottom: 14px;"></div>
+            <button type="button" class="btn-primary" onclick="closeReportModal()">확인</button>
+        </div>
+    </div>
+
+
+    <!-- 게시글 상세 모달 -->
+    <div class="modal-overlay" id="postModal">
+        <div class="modal-box">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+                <span style="font-size: 11px; font-weight: 700; color: #0284c7; background: #e0f2fe; padding: 3px 8px; border-radius: 4px;">게시글</span>
+                <span style="font-size: 18px; cursor: pointer; color: #94a3b8;" onclick="closePostModal()">✕</span>
+            </div>
+            <h3 id="postDetailTitle" style="font-size: 16px; font-weight: 700; color: #0f172a; margin-bottom: 4px;">글 제목</h3>
+            <div id="postDetailAuthor" style="font-size: 12px; color: var(--text-muted); margin-bottom: 14px;">작성자</div>
+            <div id="postDetailBody" style="font-size: 13px; color: #334155; line-height: 1.6; padding: 12px; background: #f8fafc; border-radius: 8px; margin-bottom: 14px;">본문 내용</div>
+            <div style="font-weight: 700; font-size: 13px; color: #0f172a; margin-bottom: 8px;">💬 댓글 및 답변 목록</div>
+            <div id="commentList"></div>
+            <div style="margin-top: 14px; padding-top: 12px; border-top: 1px solid #e2e8f0;">
+                <div style="display: flex; gap: 8px;">
+                    <input type="text" id="newCommentInput" class="form-input" style="margin-bottom: 0;" placeholder="답글이나 댓글을 입력하세요..." />
+                    <button type="button" class="btn-primary" style="width: 80px; padding: 10px;" onclick="addComment()">등록</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <!-- 지원서 작성 모달 -->
+    <div class="modal-overlay" id="applyModal">
+        <div class="modal-box">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+                <h3 id="applyTargetTitle" style="font-size: 17px; font-weight: 800; color: #0f172a;">지원서 작성</h3>
+                <span style="font-size: 18px; cursor: pointer; color: #94a3b8;" onclick="closeApplyModal()">✕</span>
+            </div>
+            <label class="form-label" for="applyNameInput">지원자 이름</label>
+            <input type="text" id="applyNameInput" class="form-input" />
+            <label class="form-label" for="applyInfoInput">학교 및 학과 / 학번</label>
+            <input type="text" id="applyInfoInput" class="form-input" />
+            <label class="form-label" for="applyPhoneInput">연락처</label>
+            <input type="text" id="applyPhoneInput" class="form-input" placeholder="010-XXXX-XXXX" />
+            <label class="form-label" for="applyNoteInput">지원 동기 및 메시지</label>
+            <textarea id="applyNoteInput" class="form-textarea" rows="3" placeholder="지원 동기 및 각오를 입력하세요."></textarea>
+            <button type="button" class="btn-primary" onclick="submitApplication()">제출 및 최종 지원하기</button>
+        </div>
+    </div>
+
+
+    <!-- 게시글 작성 모달 -->
+    <div class="modal-overlay" id="writeModal">
+        <div class="modal-box">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+                <h3 style="font-size: 17px; font-weight: 800; color: #0f172a;">게시글 작성</h3>
+                <span style="font-size: 18px; cursor: pointer; color: #94a3b8;" onclick="closeWriteModal()">✕</span>
+            </div>
+            <label class="form-label" for="newPostTitle">제목</label>
+            <input type="text" id="newPostTitle" class="form-input" placeholder="제목을 입력하세요" />
+            <label class="form-label" for="newPostBody">내용</label>
+            <textarea id="newPostBody" class="form-textarea" rows="4" placeholder="내용을 입력하세요"></textarea>
+            <button type="button" class="btn-primary" onclick="submitNewPost()">게시글 등록하기</button>
+        </div>
+    </div>
+
+
+    <script>
+        /* 전역 상태 */
+        let currentUserName = "김간호";
+        let currentUserSchoolDept = "경인여대 간호학과";
+        let currentUserId = "12345678";
+        let isPremium = false;
+        let freeTrialUsed = false;
+        let simTickets = 0;
+
+
+        /* 공통 유틸리티 */
+        function showToast(msg) {
+            const toast = document.getElementById('authToast');
+            const textEl = document.getElementById('toastText');
+            if (!toast || !textEl) return;
+            textEl.innerText = msg;
+            toast.classList.add('show');
+            setTimeout(() => toast.classList.remove('show'), 1800);
+        }
+
+
+        function formatClock(sec) {
+            const s = Math.max(0, Math.floor(sec));
+            const m = Math.floor(s / 60);
+            const r = s % 60;
+            return `${String(m).padStart(2, '0')}:${String(r).padStart(2, '0')}`;
+        }
+
+
+        /* 1. 학생 인증 (오류 없이 즉시 작동) */
+        function submitAuthInfo() {
+            const nameEl = document.getElementById('authName');
+            const deptEl = document.getElementById('authSchoolDept');
+            const idEl = document.getElementById('authId');
+
+
+            const nameVal = nameEl ? nameEl.value.trim() : "";
+            const deptVal = deptEl ? deptEl.value.trim() : "";
+            const idVal = idEl ? idEl.value.trim() : "";
+
+
+            currentUserName = nameVal || "김간호";
+            currentUserSchoolDept = deptVal || "경인여대 간호학과";
+            currentUserId = idVal || "12345678";
+
+
+            const badge = document.getElementById('topUserBadge');
+            if (badge) {
+                badge.innerHTML = `<span>🎓 인증완료 | ${currentUserName} (${currentUserSchoolDept})</span>`;
+            }
+
+
+            const modal = document.getElementById('authModal');
+            if (modal) {
+                modal.classList.remove('open');
+                modal.style.display = 'none';
+            }
+
+
+            showToast('인증되었습니다');
+        }
+
+
+        function reopenAuthModal() {
+            const modal = document.getElementById('authModal');
+            if (modal) {
+                modal.classList.add('open');
+                modal.style.display = 'flex';
+            }
+        }
+
+
+        /* 사이드바 & 탭 전환 */
+        function toggleSidebar() {
+            const sidebar = document.getElementById('sidebar');
+            const icon = document.getElementById('toggleIcon');
+            if (!sidebar || !icon) return;
+            sidebar.classList.toggle('collapsed');
+            icon.innerText = sidebar.classList.contains('collapsed') ? '▶' : '◀';
+        }
+
+
+        function switchTab(tabId, element) {
+            document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
+            document.querySelectorAll('.nav-item').forEach(item => item.classList.remove('active'));
+            const target = document.getElementById(tabId);
+            if (target) target.classList.add('active');
+            if (element) element.classList.add('active');
+        }
+
+
+        function switchTabByMenu(tabId) {
+            document.querySelectorAll('.nav-item').forEach(item => {
+                const attr = item.getAttribute('onclick') || '';
+                if (attr.includes(`'${tabId}'`)) {
+                    switchTab(tabId, item);
+                }
+            });
+        }
+
+
+        /* D-Day 수정 */
+        function openDdayModal() {
+            document.getElementById('editDdayLabel1').value = document.getElementById('ddayLabel1').innerText;
+            document.getElementById('editDdayVal1').value = document.getElementById('ddayVal1').innerText;
+            document.getElementById('editDdayLabel2').value = document.getElementById('ddayLabel2').innerText;
+            document.getElementById('editDdayVal2').value = document.getElementById('ddayVal2').innerText;
+            document.getElementById('ddayModal').classList.add('open');
+        }
+
+
+        function closeDdayModal() {
+            document.getElementById('ddayModal').classList.remove('open');
+        }
+
+
+        function saveDday() {
+            document.getElementById('ddayLabel1').innerText = document.getElementById('editDdayLabel1').value.trim() || '학습 일정';
+            document.getElementById('ddayVal1').innerText = document.getElementById('editDdayVal1').value.trim() || 'D-7';
+            document.getElementById('ddayLabel2').innerText = document.getElementById('editDdayLabel2').value.trim() || '취업 일정';
+            document.getElementById('ddayVal2').innerText = document.getElementById('editDdayVal2').value.trim() || 'D-3';
+            closeDdayModal();
+            showToast('D-Day 일정이 수정되었습니다');
+        }
+
+
+        /* 전공 핵심 과목별 데이터 */
+        const MAJOR_SUBJECTS = {
+            fundamental: [
+                { title: "1. 활력징후 정상범위 및 측정 원칙", body: "성인 정상 기준: 체온 36.5~37.5℃, 맥박 60~100회/분, 호흡 12~20회/분, 혈압 120/80mmHg 미만. 혈압 측정 전 5분 이상 안정을 유지하고 팔을 심장 높이에 둡니다." },
+                { title: "2. 내과적 무균술 vs 외과적 무균술", body: "내과적 무균술은 미생물 수와 전파를 줄이는 청결 기술(손위생·격리)이며, 외과적 무균술은 모든 미생물과 아포를 제거하는 멸균 기술(도뇨·수술·중심정맥관)입니다." },
+                { title: "3. 투약 5대 원칙 (5 Rights)", body: "정확한 대상자(Right Patient), 정확한 약물(Right Drug), 정확한 용량(Right Dose), 정확한 경로(Right Route), 정확한 시간(Right Time)을 투약 전 3회 확인합니다." },
+                { title: "4. 체위 간호 핵심", body: "호흡곤란 시 반좌위(Fowler's), 관장 시 좌측 심스체위(Sims'), 여성 도뇨 및 회음부 간호 시 배횡와위(Dorsal recumbent)를 적용합니다." }
+            ],
+            adult: [
+                { title: "1. ABGA 정상범위 및 산-염기 불균형", body: "pH 7.35~7.45, PaCO2 35~45mmHg, HCO3- 22~26mEq/L. PaCO2는 호흡성 지표(반대 방향), HCO3-는 대사성 지표(같은 방향)로 해석합니다." },
+                { title: "2. 의식수준 사정 (LOC & GCS)", body: "LOC 5단계: Alert → Drowsy → Stupor → Semicoma → Coma. GCS는 눈뜨기(4)+언어반응(5)+운동반응(6) 총 15점 만점이며 8점 이하는 혼수 상태입니다." },
+                { title: "3. 산소요법 적용 기준", body: "비강캐뉼라(Nasal Cannula)는 1~6L/min(FiO2 24~44%) 공급에 사용하며, COPD 환자는 저산소성 호흡자극 유지를 위해 저농도 산소(1~2L/min)를 주의 깊게 투여합니다." },
+                { title: "4. 주요 전해질 정상치", body: "칼륨(K+) 3.5~5.0mEq/L(부정맥 주의), 나트륨(Na+) 135~145mEq/L(의식 변화 주의), 칼슘(Ca2+) 8.5~10.5mg/dL 범위를 유지해야 합니다." }
+            ],
+            pharmacology: [
+                { title: "1. 약동학 4단계 (ADME)", body: "흡수(Absorption) → 분포(Distribution) → 대사(Metabolism, 주로 간) → 배설(Excretion, 주로 신장) 과정을 거쳐 약물 혈중 농도와 작용 시간이 결정됩니다." },
+                { title: "2. 치료지수(TI)와 혈중약물농도(TDM)", body: "치료지수(LD50/ED50)가 좁은 약물(디곡신, 리튬, 반코마이신 등)은 독성 위험이 높아 정기적인 혈중약물농도 모니터링(TDM)이 필수입니다." },
+                { title: "3. 자율신경계 약물 작용", body: "교감신경 작용제(에피네프린 등)는 심박수·혈압 상승 및 기관지 확장을, 부교감신경 차단제(아트로핀 등)는 분비물 감소와 서맥 교정에 사용합니다." },
+                { title: "4. 고위험 약물 안전관리", body: "인슐린(저혈당), 항응고제(출혈·INR/aPTT 확인), 고농도 KCl(절대 원액 IV bolus 금지, 반드시 희석 후 천천히 주입)은 이중 확인(Double-check)이 필수입니다." }
+            ],
+            pathology: [
+                { title: "1. 급성 염증의 5대 징후", body: "혈관 확장과 투과성 증가로 발적(Redness), 열감(Heat), 부종(Swelling), 통증(Pain), 기능소실(Loss of function)이 나타납니다." },
+                { title: "2. 세포 적응의 5가지 유형", body: "위축(크기 감소), 비대(크기 증가), 증식(세포 수 증가), 화생(성숙 세포의 다른 형태 치환), 이형성(비정상적 배열·전암 병변 가능)으로 구분합니다." },
+                { title: "3. 괴사(Necrosis) vs 세포자멸사(Apoptosis)", body: "괴사는 외부 손상에 의한 병적 세포사로 염증 반응을 유발하지만, 세포자멸사는 프로그램된 세포사로 염증 없이 주변 대식세포에 의해 제거됩니다." },
+                { title: "4. 쇼크의 종류와 기전", body: "저혈량성(출혈·탈수), 심인성(심근경색·펌프 부전), 패혈성(감염에 의한 전신 혈관 확장), 아나필락시스(급성 알레르기 과민반응)로 분류합니다." }
+            ],
+            physiology: [
+                { title: "1. 신경세포 활동전위", body: "역치 도달 시 Na+ 채널 개방으로 탈분극(Depolarization), 이어 K+ 유출로 재분극(Repolarization)이 일어나며 불응기 동안 자극의 역전도를 막습니다." },
+                { title: "2. 심박출량(CO)과 혈압 조절", body: "CO = HR(심박수) × SV(일회박출량), 평균동맥압(MAP) = CO × SVR(전신혈관저항). 압수용체 반사가 단기 혈압을 신속히 조절합니다." },
+                { title: "3. 호흡기계 가스교환과 V/Q", body: "폐포-모세혈관막에서 분압 차에 의한 단순 확산으로 O2와 CO2가 교환되며, 정상 환기-관류비(V/Q)는 약 0.8입니다." },
+                { title: "4. 사구체 여과율(GFR)과 RAAS", body: "정상 GFR은 약 125mL/min이며, 혈압·신혈류 저하 시 레닌-안지오텐신-알도스테론계(RAAS)가 활성화되어 혈관 수축 및 Na+/수분 재흡수를 촉진합니다." }
+            ],
+            pediatric: [
+                { title: "1. 발달단계 핵심 (에릭슨 · 피아제)", body: "영아기(신뢰감 vs 불신감 / 감각운동기), 유아기(자율성 vs 수치심 / 전조작기), 학령전기(주도성 vs 죄책감), 학령기(근면성 vs 열등감 / 구체적 조작기)." },
+                { title: "2. 연령별 활력징후 특징", body: "아동은 성인에 비해 맥박과 호흡수가 빠르고 혈압은 낮습니다. 영아의 맥박은 심첨맥박(Apical pulse)을 1분간 측정하는 것이 정확합니다." },
+                { title: "3. 고열 및 열성경련 간호 중재", body: "38℃ 이상 고열 시 해열제 투여 및 미온수 간호를 적용하며, 열성경련 발생 시 기도 확보·측위 유지·경련 양상 및 지속시간을 관찰합니다." },
+                { title: "4. 영유아 예방접종 및 성장평가", body: "출생 직후 B형간염, 4주 이내 BCG, 2·4·6개월 DTaP·IPV·Hib·PCV 접종 일정을 확인하고 체중·신장·두위 백분위수로 성장을 평가합니다." }
+            ]
+        };
+
+
+        function renderMajorSubject(subjectKey, btnEl) {
+            const cards = MAJOR_SUBJECTS[subjectKey] || [];
+            const container = document.getElementById('majorCardsContainer');
+            if (!container) return;
+            container.innerHTML = cards.map(item => `
+                <div class="major-note-card">
+                    <h4>${item.title}</h4>
+                    <p>${item.body}</p>
+                </div>
+            `).join('');
+
+
+            if (btnEl) {
+                document.querySelectorAll('#majorTabsBar .major-tab-btn').forEach(b => b.classList.remove('active'));
+                btnEl.classList.add('active');
+            }
+        }
+
+
+        /* 핵심술기 영상 플레이어 데이터 및 로직 */
+        const SKILL_DATA = {
+            vital: {
+                title: "활력징후 측정 (Vital Signs & BP)",
+                image: "1000022066.jpg",
+                totalSec: 435,
+                steps: [
+                    { title: "1단계: 손위생 및 대상자 확인", desc: "손소독제로 손위생을 실시하고 대상자의 이름과 등록번호를 개방형으로 확인합니다." },
+                    { title: "2단계: 안정 상태 확인 및 커프 착용", desc: "5분 이상 안정을 확인한 뒤 상완동맥 위 2~3cm 위치에 커프를 감습니다." },
+                    { title: "3단계: 촉진법으로 수축기압 추정", desc: "요골동맥 맥박 소실 지점을 확인한 뒤 30mmHg 더 가압합니다." },
+                    { title: "4단계: 청진기로 혈압 측정", desc: "상완동맥 위에 청진기를 대고 초당 2~3mmHg 속도로 감압하며 수축기/이완기압을 읽습니다." },
+                    { title: "5단계: 맥박·호흡·체온 측정 및 기록", desc: "요골맥박과 호흡수를 각 1분간 측정하고 체온 확인 후 정확히 기록합니다." }
+                ]
+            },
+            iv: {
+                title: "정맥수액주입 및 투약 (IV & Medication)",
+                image: "1000022070.jpg",
+                totalSec: 580,
+                steps: [
+                    { title: "1단계: 투약 5대 원칙 및 무균 준비", desc: "처방전과 약물을 대조하고 무균술을 지켜 수액 세트를 준비합니다." },
+                    { title: "2단계: 수액 세트 공기 제거(Priming)", desc: "챔버를 1/2~2/3 채운 뒤 튜브 내 공기를 완전히 빼냅니다." },
+                    { title: "3단계: 지혈대 결찰 및 혈관 소독", desc: "천자 부위 10~15cm 상방에 지혈대를 매고 알코올 솜으로 안에서 밖으로 소독합니다." },
+                    { title: "4단계: 15~30도 각도로 정맥 천자", desc: "사면이 위로 향하게 천자 후 역혈이 보이면 카테터를 밀어 넣고 지혈대를 풉니다." },
+                    { title: "5단계: 수액 연결, 고정 및 gtt 조절", desc: "수액 주입을 확인하고 고정한 뒤 처방된 방울 수(gtt/min)로 속도를 맞춥니다." }
+                ]
+            },
+            suction: {
+                title: "기관 내 흡인 (Endotracheal Suction)",
+                image: "1000022077.png",
+                totalSec: 492,
+                steps: [
+                    { title: "1단계: 호흡음 청진 및 압력 확인", desc: "폐음을 청진하고 SpO2 수치와 흡인기 압력(성인 80~120mmHg)을 점검합니다." },
+                    { title: "2단계: 과산소화(Hyperoxygenation)", desc: "저산소혈증 예방을 위해 100% 산소를 30초~1분간 공급합니다." },
+                    { title: "3단계: 멸균 장갑 착용 및 카테터 연결", desc: "우세손에 멸균 장갑을 착용하고 흡인 튜브와 카테터를 무균적으로 연결합니다." },
+                    { title: "4단계: 무흡인 삽입 후 10~15초 흡인", desc: "조절공을 연 채 삽입 후 저항 시 1~2cm 후퇴하여 회전시키며 10~15초 이내 흡인합니다." },
+                    { title: "5단계: 재산소화 및 호흡 상태 재사정", desc: "산소를 다시 연결하고 청진 및 SpO2 회복 여부를 확인한 뒤 기록합니다." }
+                ]
+            },
+            indwelling: {
+                title: "유치도뇨 (Indwelling Catheterization)",
+                image: "1000022078.png",
+                totalSec: 625,
+                steps: [
+                    { title: "1단계: 도뇨 세트 개봉 및 멸균 준비", desc: "멸균 장갑을 착용하고 윤활제, 소독솜, 멸균증류수 주사기를 준비합니다." },
+                    { title: "2단계: 회음부 소독 (위에서 아래로)", desc: "대음순→소음순→요도구 순으로 1회씩 닦고 폐기합니다." },
+                    { title: "3단계: 윤활제 도포 후 도뇨관 삽입", desc: "소변이 나올 때까지 삽입한 뒤 2~3cm 더 밀어 넣습니다." },
+                    { title: "4단계: 멸균증류수로 Ballooning 고정", desc: "멸균증류수 5~10cc를 주입해 풍선을 부풀리고 살짝 당겨 고정 상태를 확인합니다." },
+                    { title: "5단계: 소변백 연결 및 방광 아래 고정", desc: "소변백을 방광보다 낮게 걸고 도뇨관이 꼬이지 않도록 대퇴부에 고정합니다." }
+                ]
+            },
+            straight: {
+                title: "단순도뇨 (Straight Catheterization)",
+                image: "1000022082.png",
+                totalSec: 410,
+                steps: [
+                    { title: "1단계: 목적 설명 및 배횡와위", desc: "대상자에게 목적을 설명하고 배횡와위(Dorsal recumbent)를 취해줍니다." },
+                    { title: "2단계: 멸균 장갑 착용 및 물품 정돈", desc: "단순도뇨관 끝에 수용성 윤활제를 바르고 곡반을 회음부 가까이에 둡니다." },
+                    { title: "3단계: 요도구 소독", desc: "소독솜을 잡은 섭자로 요도구 주위를 위에서 아래로 닦아 무균 상태를 확보합니다." },
+                    { title: "4단계: 단순도뇨관 삽입 및 배뇨", desc: "소변이 흘러나올 때까지 부드럽게 삽입한 뒤 소변 흐름이 멈출 때까지 배출합니다." },
+                    { title: "5단계: 도뇨관 제거 및 배뇨량 기록", desc: "도뇨관을 천천히 제거하고 회음부를 닦아준 뒤 배출된 소변량을 측정·기록합니다." }
+                ]
+            }
+        };
+
+
+        const SPONSOR_ADS = [
+            {
+                tag: "의료기기 · 실습물품 제휴",
+                headline: "🩺 간호대생 실습 필수템! 듀얼 헤드 청진기 & 펜라이트 세트",
+                sub: "간호학과 재학생 인증 시 학생 특별가 25% 즉시 할인 + 이름 각인 무료"
+            },
+            {
+                tag: "대학병원 채용 · 취업 제휴",
+                headline: "🏥 2027 상급종합병원 신규간호사 AI 면접 & 자소서 완벽 대비반",
+                sub: "NurseTap 제휴 특전: 무료 직무적성 모의고사 응시권 제공"
+            }
+        ];
+
+
+        let currentSkillKey = 'vital';
+        let currentVideoSec = 0;
+        let isPlaying = false;
+        let captionsEnabled = true;
+        let playbackSpeed = 1.0;
+        let videoLoopTimer = null;
+        let adTimer = null;
+
+
+        function playSkillVideo(skillKey) {
+            currentSkillKey = skillKey;
+            currentVideoSec = 0;
+            const skill = SKILL_DATA[skillKey];
+            document.getElementById('skillVideoTitle').innerText = skill.title;
+            const visual = document.getElementById('ytVideoVisual');
+            if (visual && skill.image) {
+                visual.style.backgroundImage = `url('${skill.image}')`;
+            }
+            document.getElementById('skillVideoModal').classList.add('open');
+            updateVideoFrame();
+
+
+            if (!isPremium) {
+                showSponsorCountdownAd();
+            } else {
+                document.getElementById('sponsorAdOverlay').style.display = 'none';
+                startSmoothPlayback();
+            }
+        }
+
+
+        function showSponsorCountdownAd() {
+            stopSmoothPlayback();
+            clearInterval(adTimer);
+
+
+            const ad = SPONSOR_ADS[Math.floor(Math.random() * SPONSOR_ADS.length)];
+            document.getElementById('adSponsorTag').innerText = ad.tag;
+            document.getElementById('adHeadline').innerText = ad.headline;
+            document.getElementById('adSubcopy').innerText = ad.sub;
+
+
+            const overlay = document.getElementById('sponsorAdOverlay');
+            const countText = document.getElementById('adCountdownText');
+            const closeBtn = document.getElementById('adCloseBtn');
+            overlay.style.display = 'flex';
+            closeBtn.style.display = 'none';
+
+
+            let sec = 3;
+            countText.innerText = `${sec}초 후 닫기 가능`;
+
+
+            adTimer = setInterval(() => {
+                sec--;
+                if (sec > 0) {
+                    countText.innerText = `${sec}초 후 닫기 가능`;
+                } else {
+                    clearInterval(adTimer);
+                    countText.innerText = '닫기 버튼을 눌러 시청';
+                    closeBtn.style.display = 'inline-flex';
+                }
+            }, 1000);
+        }
+
+
+        function closeSponsorAdAndPlay() {
+            clearInterval(adTimer);
+            document.getElementById('sponsorAdOverlay').style.display = 'none';
+            startSmoothPlayback();
+        }
+
+
+        function updateVideoFrame() {
+            const skill = SKILL_DATA[currentSkillKey];
+            const ratio = Math.min(1, Math.max(0, currentVideoSec / skill.totalSec));
+            const stepIdx = Math.min(skill.steps.length - 1, Math.floor(ratio * skill.steps.length));
+            const step = skill.steps[stepIdx];
+
+
+            document.getElementById('ytLiveStepTag').innerText = `시연 영상 재생 중 · STEP ${stepIdx + 1} / ${skill.steps.length}`;
+            document.getElementById('playerStepTitle').innerText = step.title;
+            document.getElementById('playerStepDesc').innerText = step.desc;
+            document.getElementById('playerStepDesc').style.display = captionsEnabled ? 'inline-block' : 'none';
+
+
+            document.getElementById('ytScrubberFill').style.width = `${(ratio * 100).toFixed(2)}%`;
+            document.getElementById('ytTimeLabel').innerText = `${formatClock(currentVideoSec)} / ${formatClock(skill.totalSec)}`;
+        }
+
+
+        function startSmoothPlayback() {
+            clearInterval(videoLoopTimer);
+            isPlaying = true;
+            document.getElementById('ytStage').classList.add('is-playing');
+            document.getElementById('ytPlayPauseBtn').innerText = '⏸';
+
+
+            videoLoopTimer = setInterval(() => {
+                const skill = SKILL_DATA[currentSkillKey];
+                currentVideoSec += 0.1 * playbackSpeed;
+                if (currentVideoSec >= skill.totalSec) {
+                    currentVideoSec = skill.totalSec;
+                    updateVideoFrame();
+                    stopSmoothPlayback();
+                } else {
+                    updateVideoFrame();
+                }
+            }, 100);
+        }
+
+
+        function stopSmoothPlayback() {
+            clearInterval(videoLoopTimer);
+            isPlaying = false;
+            document.getElementById('ytStage').classList.remove('is-playing');
+            document.getElementById('ytPlayPauseBtn').innerText = '▶';
+        }
+
+
+        function togglePlayPause() {
+            const skill = SKILL_DATA[currentSkillKey];
+            if (isPlaying) {
+                stopSmoothPlayback();
+            } else {
+                if (currentVideoSec >= skill.totalSec) currentVideoSec = 0;
+                startSmoothPlayback();
+            }
+        }
+
+
+        function seekVideoByBar(e) {
+            const bar = document.getElementById('ytScrubberBar');
+            const rect = bar.getBoundingClientRect();
+            const ratio = Math.min(1, Math.max(0, (e.clientX - rect.left) / rect.width));
+            currentVideoSec = ratio * SKILL_DATA[currentSkillKey].totalSec;
+            updateVideoFrame();
+        }
+
+
+        function jumpSkillStep(delta) {
+            const skill = SKILL_DATA[currentSkillKey];
+            const stepLen = skill.totalSec / skill.steps.length;
+            const currentIdx = Math.min(skill.steps.length - 1, Math.floor(currentVideoSec / stepLen));
+            const nextIdx = Math.min(skill.steps.length - 1, Math.max(0, currentIdx + delta));
+            currentVideoSec = nextIdx * stepLen;
+            updateVideoFrame();
+        }
+
+
+        function toggleCaptions() {
+            captionsEnabled = !captionsEnabled;
+            const btn = document.getElementById('ytCaptionBtn');
+            btn.classList.toggle('active-cc', captionsEnabled);
+            document.getElementById('playerStepDesc').style.display = captionsEnabled ? 'inline-block' : 'none';
+        }
+
+
+        function changePlaybackSpeed() {
+            playbackSpeed = parseFloat(document.getElementById('ytSpeedSelect').value) || 1.0;
+        }
+
+
+        function closeSkillVideoModal() {
+            stopSmoothPlayback();
+            clearInterval(adTimer);
+            document.getElementById('skillVideoModal').classList.remove('open');
+        }
+
+
+        /* 멤버십 & 이용권 */
+        function openPremiumModal() {
+            document.getElementById('premiumModal').classList.add('open');
+        }
+
+
+        function closePremiumModal() {
+            document.getElementById('premiumModal').classList.remove('open');
+        }
+
+
+        function activatePremium(planName) {
+            isPremium = true;
+            document.getElementById('simInlineAlert').style.display = 'none';
+            const btn = document.getElementById('premiumTopBtn');
+            btn.classList.add('active-member');
+            document.getElementById('premiumBtnLabel').innerText = '프리미엄 이용중';
+            document.getElementById('premiumSimSection').classList.add('unlocked');
+            updateSimTicketBadge();
+            closePremiumModal();
+
+
+            if (document.getElementById('skillVideoModal').classList.contains('open')) {
+                clearInterval(adTimer);
+                document.getElementById('sponsorAdOverlay').style.display = 'none';
+                startSmoothPlayback();
+            }
+            showToast(`${planName} 적용 완료!`);
+        }
+
+
+        function buySingleTicket() {
+            simTickets++;
+            document.getElementById('simInlineAlert').style.display = 'none';
+            updateSimTicketBadge();
+            showToast('AI 시뮬레이션 1회 이용권(900원)이 충전되었습니다');
+        }
+
+
+        function buySingleTicketFromModal() {
+            closePremiumModal();
+            buySingleTicket();
+        }
+
+
+        function updateSimTicketBadge() {
+            const badge = document.getElementById('simTicketBadge');
+            if (!badge) return;
+            if (isPremium) {
+                badge.innerText = '👑 프리미엄 무제한 · 심층 리포트';
+            } else if (!freeTrialUsed) {
+                badge.innerText = '🎟️ 무료 체험 1회 남음';
+            } else {
+                badge.innerText = `🎟️ 보유 1회 이용권: ${simTickets}회`;
+            }
+        }
+
+
+        /* AI 임상 시뮬레이션 */
+        let selectedScenarioKey = 'preop';
+        let selectedUserRole = '학생간호사 (SN)';
+        let selectedAiRole = '대상자 (환자)';
+        let simLog = [];
+
+
+        const SCENARIO_SCRIPTS = {
+            preop: {
+                title: "[성인간호] 복강경 담낭절제술 불안 환자",
+                opening: "간호사님... 제가 내일 아침 첫 수술인데, 마취하고 나서 못 깨어나면 어쩌나 너무 무섭고 심장이 두근거려요. 밤에 잠도 한숨도 못 잤어요.",
+                replies: [
+                    "제 마음을 알아주셔서 조금 안심이 되네요. 그런데 수술 시간은 얼마나 걸리고, 수술 후에 통증은 심한가요?",
+                    "설명해 주신 대로 심호흡을 해보니까 한결 나아졌어요. 내일 아침까지 제가 준비해야 할 주의사항이 또 있을까요?"
+                ],
+                quiz: {
+                    q: "수술 전 불안을 호소하는 대상자에게 가장 적절한 치료적 의사소통 반응은?",
+                    options: [
+                        "① \"요즘 복강경 수술은 다 간단해서 걱정할 필요 전혀 없어요.\" (거짓 안심)",
+                        "② \"수술을 앞두고 많이 긴장되고 두려우시군요. 어떤 부분이 가장 걱정되시는지 말씀해 주시겠어요?\" (감정 반영 및 개방형 질문)",
+                        "③ \"보호자분께 여쭤보시고 주무세요.\" (회피)"
+                    ],
+                    answerIdx: 1,
+                    hint: "환자의 불안을 성급히 축소하기보다 감정을 공감·반영하고 두려움의 구체적 원인을 표현하도록 돕는 개방형 질문이 치료적 의사소통의 핵심입니다."
+                }
+            },
+            medrefuse: {
+                title: "[정신간호] 부작용으로 투약 거부하는 환자",
+                opening: "이 약 먹으면 속이 쓰리고 어지러워서 오늘 아침 약은 안 먹을래요. 그냥 치워주세요.",
+                replies: [
+                    "사실 약을 먹고 나면 낮에 자꾸 졸리고 입이 바짝 말라서 너무 불편했거든요.",
+                    "담당 의사 선생님께 부작용 증상을 말씀드리고 약 용량이나 시간을 상의해 주신다니 믿고 복용해 볼게요."
+                ],
+                quiz: {
+                    q: "대상자가 부작용을 이유로 투약을 거부할 때 간호사의 우선적인 중재는?",
+                    options: [
+                        "① 투약 거부 사유와 구체적 불편 증상을 사정하고 의료진과 상의한다.",
+                        "② 처방된 약이므로 무조건 지금 삼켜야 한다고 강요한다.",
+                        "③ 기록만 남기고 환자에게 이유를 묻지 않는다."
+                    ],
+                    answerIdx: 0,
+                    hint: "대상자의 투약 거부 권리를 존중하되 거부 원인(위장장애, 졸림 등)을 구체적으로 사정하여 의사에게 보고하고 대안을 모색해야 합니다."
+                }
+            },
+            peds: {
+                title: "[아동간호] 39.2℃ 고열 환아와 다급한 보호자",
+                opening: "간호사님! 우리 아이가 열이 39.2도까지 올랐는데 해열제 먹여도 안 떨어져요! 혹시 열성경련이라도 오면 어떡하죠? 빨리 좀 봐주세요!",
+                replies: [
+                    "네, 지금 옷을 가볍게 벗기고 미온수 마사지 준비할게요. 수분 섭취는 어떻게 시키면 될까요?",
+                    "침착하게 안내해 주셔서 저도 마음이 진정됐어요. 체온 다시 재보고 변화 있으면 바로 호출할게요."
+                ],
+                quiz: {
+                    q: "고열 환아 보호자가 극도로 불안해할 때 우선적으로 취해야 할 간호 중재는?",
+                    options: [
+                        "① 보호자를 안정시키며 현재 활력징후와 해열제 투여 시간을 확인하고 미온수 간호를 교육한다.",
+                        "② 보호자에게 너무 예민하게 반응하신다고 지적한다.",
+                        "③ 찬물이나 얼음물로 즉시 전신을 닦도록 지시한다."
+                    ],
+                    answerIdx: 0,
+                    hint: "응급실 보호자는 정서적 지지가 필수적입니다. 침착한 태도로 안심시키며 해열제 투여 이력을 확인하고, 오한을 유발하는 얼음물 대신 미온수 간호를 안내합니다."
+                }
+            },
+            fall: {
+                title: "[기본/안전] 어지럼증 호소 낙상 고위험 환자",
+                opening: "머리가 좀 핑 돌긴 하는데, 간호사님 바쁘신 것 같아서 혼자 화장실 다녀올게요. 침대 난간 좀 내려주세요.",
+                replies: [
+                    "아, 어지러울 때 혼자 걸어가면 넘어져서 크게 다칠 수 있겠군요. 간호사님 부축을 받아 이동할게요.",
+                    "호출벨을 손 닿는 곳에 두어 주셔서 고마워요. 화장실 가고 싶을 때 꼭 누를게요."
+                ],
+                quiz: {
+                    q: "어지럼증을 호소하는 낙상 고위험 대상자에게 가장 적절한 안전 간호는?",
+                    options: [
+                        "① 침상 안정을 설명하고 호출벨을 손 닿는 곳에 두며 이동 시 반드시 간호사가 동행한다.",
+                        "② 조심해서 천천히 혼자 다녀오시라고 침대 난간을 모두 내린다.",
+                        "③ 화장실에 가지 말라고 수분 섭취를 금지한다."
+                    ],
+                    answerIdx: 0,
+                    hint: "어지럼증 호소 환자는 기립성 저혈압 및 낙상 위험이 매우 높으므로 침상 안정을 교육하고 호출벨 사용법 안내 및 이동 시 동행이 필수입니다."
+                }
+            },
+            custom_adv: {
+                title: "[심화 · 자율 케이스] 복합 임상 상황 시뮬레이션",
+                opening: "간호사님, 갑자기 컨디션이 급격히 떨어지고 호흡·증상 변화가 느껴져요. 지금 어떻게 해야 하나요?",
+                replies: [
+                    "차근차근 설명해 주셔서 한결 진정됩니다. 활력징후와 증상 변화를 다시 확인해 볼게요.",
+                    "방금 알려주신 대처 순서대로 바로 준비하겠습니다. 감사합니다!"
+                ],
+                quiz: {
+                    q: "임상 상태 악화가 의심될 때 간호사의 우선 순위 행동으로 옳은 것은?",
+                    options: [
+                        "① 활력징후·기도·호흡·순환(ABC)을 신속히 사정하고 이상 소견을 즉시 보고한다.",
+                        "② 안정될 때까지 기다렸다가 다음 날 인계한다.",
+                        "③ 환자 혼자 화장실이나 복도를 걷게 한다."
+                    ],
+                    answerIdx: 0,
+                    hint: "상태 악화 초기에는 ABC 및 활력징후 사정과 신속한 보고가 환자 안전을 지키는 첫 단계입니다."
+                }
+            }
+        };
+
+
+        function pickScenarioCard(key, el) {
+            if (key === 'custom_adv' && !isPremium) {
+                openPremiumModal();
+                return;
+            }
+            selectedScenarioKey = key;
+            document.querySelectorAll('.scenario-card').forEach(c => c.classList.remove('selected'));
+            el.classList.add('selected');
+        }
+
+
+        function selectRole(type, roleName, el) {
+            const parentId = type === 'user' ? 'userRoleGroup' : 'aiRoleGroup';
+            document.querySelectorAll(`#${parentId} .role-chip`).forEach(c => c.classList.remove('selected'));
+            el.classList.add('selected');
+            if (type === 'user') selectedUserRole = roleName;
+            else selectedAiRole = roleName;
+        }
+
+
+        function startSimulation() {
+            if (!isPremium) {
+                if (!freeTrialUsed) {
+                    freeTrialUsed = true;
+                    updateSimTicketBadge();
+                } else if (simTickets > 0) {
+                    simTickets--;
+                    updateSimTicketBadge();
+                } else {
+                    const alertBox = document.getElementById('simInlineAlert');
+                    alertBox.innerText = '무료 체험 1회를 모두 사용했습니다. [+ 1회권 (900원)]을 충전하거나 [프리미엄]을 이용해 주세요.';
+                    alertBox.style.display = 'block';
+                    openPremiumModal();
+                    return;
+                }
+            }
+
+
+            document.getElementById('simInlineAlert').style.display = 'none';
+            const script = Object.assign({}, SCENARIO_SCRIPTS[selectedScenarioKey]);
+            if (selectedScenarioKey === 'custom_adv') {
+                const cTitle = (document.getElementById('customCaseTitle').value || '').trim();
+                const cOpen = (document.getElementById('customCaseOpening').value || '').trim();
+                if (cTitle) script.title = `[자율 케이스] ${cTitle}`;
+                if (cOpen) script.opening = cOpen;
+            }
+
+
+            simLog = [];
+            document.getElementById('simSetupCard').style.display = 'none';
+            document.getElementById('simActiveTitle').innerText = script.title;
+            document.getElementById('simActiveRoles').innerText = `나: ${selectedUserRole}  |  AI: ${selectedAiRole}`;
+            document.getElementById('simChatBox').style.display = 'flex';
+            document.getElementById('suddenQuizPanel').style.display = 'none';
+
+
+            const box = document.getElementById('simMessages');
+            box.innerHTML = `<div class="msg-bubble msg-coach">📋 <strong>시나리오 시작:</strong> ${script.title}<br />AI(${selectedAiRole})의 첫 마디에 치료적 의사소통 기법으로 응답해 보세요.</div>`;
+            appendSimMsg('ai', `${selectedAiRole}: "${script.opening}"`);
+            simLog.push({ role: 'ai', text: script.opening });
+        }
+
+
+        function backToScenarioSelect() {
+            document.getElementById('simChatBox').style.display = 'none';
+            document.getElementById('simSetupCard').style.display = 'block';
+        }
+
+
+        function appendSimMsg(sender, text) {
+            const box = document.getElementById('simMessages');
+            const div = document.createElement('div');
+            div.className = 'msg-bubble ' + (sender === 'user' ? 'msg-user' : sender === 'coach' ? 'msg-coach' : 'msg-ai');
+            div.innerHTML = text;
+            box.appendChild(div);
+            box.scrollTop = box.scrollHeight;
+        }
+
+
+        function sendSimMessage() {
+            const input = document.getElementById('simUserInput');
+            const msg = input.value.trim();
+            if (!msg) return;
+            input.value = '';
+
+
+            appendSimMsg('user', msg);
+            simLog.push({ role: 'user', text: msg });
+
+
+            const script = SCENARIO_SCRIPTS[selectedScenarioKey];
+            const turnIdx = simLog.filter(x => x.role === 'user').length - 1;
+
+
+            const hasEmpathy = /걱정|불안|많이|이해|함께|확인|도와|설명|안심|어지러|통증|열/.test(msg);
+            const feedback = hasEmpathy
+                ? "✅ <strong>[실시간 코칭]</strong> 대상자의 감정을 공감·지지하고 상황을 확인하는 치료적 의사소통이 잘 반영되었습니다!"
+                : "💡 <strong>[실시간 코칭]</strong> 지시나 설명 전에 먼저 환자/보호자의 감정을 공감('많이 걱정되셨죠')하는 문장을 덧붙이면 더욱 좋습니다.";
+            appendSimMsg('coach', feedback);
+
+
+            const reply = script.replies[turnIdx % script.replies.length];
+            setTimeout(() => {
+                appendSimMsg('ai', `${selectedAiRole}: "${reply}"`);
+                if (turnIdx === 0) triggerSuddenQuiz();
+            }, 450);
+        }
+
+
+        let recognitionInstance = null;
+        function toggleVoiceRecognition() {
+            const btn = document.getElementById('voiceMicBtn');
+            const input = document.getElementById('simUserInput');
+            const SpeechRec = window.SpeechRecognition || window.webkitSpeechRecognition;
+
+
+            if (SpeechRec) {
+                if (btn.classList.contains('listening') && recognitionInstance) {
+                    recognitionInstance.stop();
+                    btn.classList.remove('listening');
+                    return;
+                }
+                try {
+                    recognitionInstance = new SpeechRec();
+                    recognitionInstance.lang = 'ko-KR';
+                    recognitionInstance.interimResults = false;
+                    btn.classList.add('listening');
+                    showToast('음성을 인식 중입니다...');
+
+
+                    recognitionInstance.onresult = (event) => {
+                        const transcript = event.results[0][0].transcript;
+                        input.value = (input.value ? input.value + ' ' : '') + transcript;
+                        btn.classList.remove('listening');
+                    };
+                    recognitionInstance.onerror = () => {
+                        btn.classList.remove('listening');
+                        input.value = '수술 앞두고 많이 걱정되셨죠? 어떤 점이 가장 불안하신지 편하게 말씀해 주세요.';
+                        showToast('음성 입력 예시가 반영되었습니다');
+                    };
+                    recognitionInstance.onend = () => {
+                        btn.classList.remove('listening');
+                    };
+                    recognitionInstance.start();
+                } catch (_) {
+                    btn.classList.remove('listening');
+                    input.value = '많이 긴장되고 걱정되셨죠? 제가 옆에서 차근차근 설명해 드릴게요.';
+                    showToast('음성인식 문장이 입력되었습니다');
+                }
+            } else {
+                input.value = '많이 긴장되고 걱정되셨죠? 제가 옆에서 차근차근 설명해 드릴게요.';
+                showToast('음성인식 문장이 입력되었습니다');
+            }
+        }
+
+
+        function triggerSuddenQuiz() {
+            const qData = SCENARIO_SCRIPTS[selectedScenarioKey].quiz;
+            document.getElementById('quizQuestionText').innerText = `💡 [돌발 임상 퀴즈] ${qData.q}`;
+            const optBox = document.getElementById('quizOptionsList');
+            optBox.innerHTML = qData.options.map((opt, i) =>
+                `<button type="button" class="btn-secondary" style="text-align:left; font-size:12.5px;" onclick="checkQuizAnswer(${i})">${opt}</button>`
+            ).join('');
+            document.getElementById('suddenQuizPanel').style.display = 'block';
+        }
+
+
+        function checkQuizAnswer(idx) {
+            const qData = SCENARIO_SCRIPTS[selectedScenarioKey].quiz;
+            if (idx === qData.answerIdx) {
+                appendSimMsg('coach', `🎉 <strong>정답입니다!</strong> ${qData.hint}`);
+                document.getElementById('suddenQuizPanel').style.display = 'none';
+            } else {
+                appendSimMsg('coach', `⚠️ <strong>다시 생각해 볼까요?</strong> 비치료적 의사소통(거짓 안심, 회피, 강요)을 피하고 환자 중심 간호를 선택해 보세요.`);
+            }
+        }
+
+
+        function showQuizHint() {
+            const qData = SCENARIO_SCRIPTS[selectedScenarioKey].quiz;
+            appendSimMsg('coach', `📘 <strong>[모르겠어요 코칭 해설]</strong><br />${qData.hint}`);
+            document.getElementById('suddenQuizPanel').style.display = 'none';
+        }
+
+
+        function finishSimulation() {
+            const userTurns = simLog.filter(x => x.role === 'user').length;
+            const script = SCENARIO_SCRIPTS[selectedScenarioKey];
+            const reportHtml = isPremium
+                ? `<strong>🎓 [프리미엄 심층 디브리핑 리포트]</strong><br /><br />
+                   • <strong>선택 케이스:</strong> ${script.title}<br />
+                   • <strong>수행 역할:</strong> ${selectedUserRole} ↔ ${selectedAiRole}<br />
+                   • <strong>대화 턴 수:</strong> 총 ${userTurns}회 응답 수행<br />
+                   • <strong>치료적 의사소통 분석:</strong> 대상자의 정서적 불안을 경청하고 개방형 질문 및 근거 기반 간호 중재를 단계적으로 제시했습니다.<br />
+                   • <strong>임상 보완 포인트:</strong> 간호 중재 후 대상자의 이해도와 증상 완화 여부를 재평가(Re-evaluation)하는 질문을 마무리 멘트로 추가하면 완벽합니다.`
+                : `<strong>📋 [기본 시뮬레이션 요약 리포트]</strong><br /><br />
+                   • <strong>선택 케이스:</strong> ${script.title}<br />
+                   • <strong>대화 턴 수:</strong> 총 ${userTurns}회 응답 완료<br />
+                   • 치료적 의사소통 기본 훈련을 마쳤습니다.<br /><br />
+                   <span style="color:#0284c7; font-weight:700;">👑 프리미엄(월 4,900원 / 1학기 실습 패스 14,900원) 구독 시 문장별 의사소통 기법 분석 및 심층 리포트가 제공됩니다.</span>`;
+
+
+            document.getElementById('reportBodyContent').innerHTML = reportHtml;
+            document.getElementById('reportModal').classList.add('open');
+        }
+
+
+        function closeReportModal() {
+            document.getElementById('reportModal').classList.remove('open');
+        }
+
+
+        /* 커뮤니티 및 지원 모달 */
+        function openPost(title, author, body, comment) {
+            document.getElementById('postDetailTitle').innerText = title;
+            document.getElementById('postDetailAuthor').innerText = author + ' | 작성글';
+            document.getElementById('postDetailBody').innerText = body;
+            document.getElementById('commentList').innerHTML = `<div class="comment-item"><div class="comment-author">💡 답변</div><div>${comment}</div></div>`;
+            document.getElementById('postModal').classList.add('open');
+        }
+
+
+        function closePostModal() {
+            document.getElementById('postModal').classList.remove('open');
+        }
+
+
+        function addComment() {
+            const input = document.getElementById('newCommentInput');
+            if (!input.value.trim()) return;
+            const div = document.createElement('div');
+            div.className = 'comment-item';
+            div.innerHTML = `<div class="comment-author">🎓 ${currentUserName}</div><div>${input.value}</div>`;
+            document.getElementById('commentList').appendChild(div);
+            input.value = '';
+        }
+
+
+        function openApplyModal(title) {
+            document.getElementById('applyTargetTitle').innerText = `[${title}] 지원서 접수`;
+            document.getElementById('applyNameInput').value = currentUserName;
+            document.getElementById('applyInfoInput').value = `${currentUserSchoolDept} / ${currentUserId}`;
+            document.getElementById('applyModal').classList.add('open');
+        }
+
+
+        function closeApplyModal() {
+            document.getElementById('applyModal').classList.remove('open');
+        }
+
+
+        function submitApplication() {
+            closeApplyModal();
+            showToast(`${currentUserName}님의 지원서 접수가 완료되었습니다`);
+        }
+
+
+        function openWriteModal() {
+            document.getElementById('writeModal').classList.add('open');
+        }
+
+
+        function closeWriteModal() {
+            document.getElementById('writeModal').classList.remove('open');
+        }
+
+
+        function submitNewPost() {
+            const title = document.getElementById('newPostTitle').value.trim();
+            const body = document.getElementById('newPostBody').value.trim();
+            if (!title || !body) {
+                showToast('제목과 내용을 모두 입력해 주세요');
+                return;
+            }
+            const item = document.createElement('div');
+            item.className = 'post-item';
+            item.innerHTML = `<div class="post-item-main"><div class="post-item-title">[자유게시판] ${title}</div><div class="post-item-meta">${currentUserName} · 방금 전</div></div><div class="post-item-comment">댓글 0</div>`;
+            item.onclick = () => openPost(title, currentUserName, body, '등록된 답변이 아직 없습니다.');
+            document.getElementById('studentPostList').prepend(item);
+            document.getElementById('newPostTitle').value = '';
+            document.getElementById('newPostBody').value = '';
+            closeWriteModal();
+            showToast('게시글이 등록되었습니다');
+        }
+
+
+        /* 초기화: 인증 버튼/엔터 이벤트 바인딩 및 전공 핵심 기본 탭 렌더링 */
+        window.addEventListener('DOMContentLoaded', () => {
+            const authBtn = document.getElementById('authSubmitBtn');
+            if (authBtn) {
+                authBtn.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    submitAuthInfo();
+                });
+            }
+
+
+            ['authName', 'authSchoolDept', 'authId'].forEach(id => {
+                const el = document.getElementById(id);
+                if (el) {
+                    el.addEventListener('keydown', (e) => {
+                        if (e.key === 'Enter') {
+                            e.preventDefault();
+                            submitAuthInfo();
+                        }
+                    });
+                }
+            });
+
+
+            renderMajorSubject('fundamental');
+        });
+    </script>
+</body>
+</html>
